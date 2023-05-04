@@ -6,6 +6,7 @@
     label="Data Release"
     density="compact"
     hide-details="auto"
+    @update:modelValue="update_release"
   ></v-select>
 </template>
 
@@ -17,7 +18,12 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { onMounted } from 'vue'
+import { useAppStore } from '@/store/app'
 
+// get the application state store
+const store = useAppStore()
+
+// mount data, "ref" marks the data as reactive
 const select = ref('select a data release')
 let items = ref([])
 
@@ -37,6 +43,11 @@ async function get_releases() {
         })
 }
 
+function update_release(release) {
+    store.release = release
+    console.log('updating release', release)
+}
+
 // Vue mounted lifecyle hook, i.e. when the component is mounted to the DOM
 // see https://vuejs.org/guide/essentials/lifecycle.html
 onMounted(() => {
@@ -46,7 +57,5 @@ onMounted(() => {
 </script>
 
 <style>
-.release-select {
-    width: 10px
-}
+
 </style>
