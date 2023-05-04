@@ -26,6 +26,7 @@ This project is scaffolded with the following libraries:
 - [Pinia](https://pinia.vuejs.org/) - share application state between components
 - [Vitest](https://vitest.dev/) - component unit testing
 - [Playwright](https://playwright.dev/) - UI end-to-end browser testing
+- [Vue Test Utils](https://test-utils.vuejs.org/) - Vue Testing Utilities
 
 
 ## Project Setup
@@ -115,3 +116,9 @@ npm run format
 ### Customize configuration
 
 See [Vite Configuration Reference](https://vitejs.dev/config/).
+
+## Awesome Links
+
+- [Awesome Vue](https://github.com/vuejs/awesome-vue)
+- [Awesome Vite](https://github.com/vitejs/awesome-vite)
+- [Awesome Vuetify](https://github.com/vuetifyjs/awesome-vuetify)
