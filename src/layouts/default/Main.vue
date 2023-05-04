@@ -1,15 +1,16 @@
 <template>
     <v-app>
-        <v-app-bar flat>
-            <v-app-bar-title>
-                <v-icon icon="mdi-circle-slice-6" />
+        <!-- application bar layout -->
+        <app-bar />
 
-                Essentials Preset
-            </v-app-bar-title>
-        </v-app-bar>
-
+        <!-- main content layout -->
+        <v-main>
+            <RouterView />
+        </v-main>
     </v-app>
-  </template>
+</template>
 
-  <script lang="ts" setup>
-  </script>
+<script lang="ts" setup>
+import AppBar from './AppBar.vue'
+import { RouterView } from "vue-router"
+</script>
