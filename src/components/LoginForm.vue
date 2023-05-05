@@ -1,10 +1,10 @@
 <template>
     <v-menu offset-y location="bottom" :close-on-content-click="false" v-model="menu">
         <template v-slot:activator="{ props }">
-          <v-btn v-if="!store.logged_in" v-bind="props">
+          <v-btn v-if="!store.logged_in" v-bind="props" v-tippy="'Log in User'">
             <v-icon icon="mdi-account-arrow-right" class="ma-2" size="x-large"/>
         </v-btn>
-        <v-btn v-else @click="reset">
+        <v-btn v-else @click="reset" v-tippy="'Log out User'">
           <v-icon icon="mdi-account-arrow-left" class="ma-2" size="x-large"/>
           {{ store.user }}
         </v-btn>
