@@ -1,5 +1,5 @@
 <template>
-  <v-select
+  <v-autocomplete
     class="release-select"
     v-model="select"
     :items="items"
@@ -7,7 +7,7 @@
     density="compact"
     hide-details="auto"
     @update:modelValue="update_release"
-  ></v-select>
+  ></v-autocomplete>
 </template>
 
 <script lang="ts" setup>
@@ -29,6 +29,7 @@ let items = ref([])
 
 async function get_releases() {
     // function to get the data release from VALIS
+    // using public = false and a hard-coded public release to get all releases
     await axios.get('http://localhost:8000/envs/releases?public=False&release=DR17')
         .then((response) => {
             console.log(response)
@@ -43,7 +44,8 @@ async function get_releases() {
         })
 }
 
-function update_release(release) {
+function update_release(release: string) {
+    // update the app store with the selected data release
     store.release = release
     console.log('updating release', release)
 }
@@ -51,6 +53,7 @@ function update_release(release) {
 // Vue mounted lifecyle hook, i.e. when the component is mounted to the DOM
 // see https://vuejs.org/guide/essentials/lifecycle.html
 onMounted(() => {
+    // get the available data releases
     get_releases()
 })
 

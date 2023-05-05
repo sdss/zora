@@ -15,10 +15,14 @@
         <v-btn><RouterLink to="/about">About</RouterLink></v-btn>
       </v-col>
 
-      <!-- release and login -->
-      <v-col cols="2" class="ma-2">
+      <!-- release -->
+      <v-col cols="2">
         <release-select />
       </v-col>
+
+      <!-- login -->
+      <login-form />
+
     </v-row>
   </v-app-bar>
 </template>
@@ -26,4 +30,5 @@
 <script lang="ts" setup>
 import { RouterLink } from "vue-router"
 import ReleaseSelect from '@/components/ReleaseSelect.vue'
+import LoginForm from '@/components/LoginForm.vue'
 </script>
