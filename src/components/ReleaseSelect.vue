@@ -1,12 +1,13 @@
 <template>
   <v-autocomplete
     class="release-select"
-    v-model="select"
+    v-model="store.release"
     :items="items"
+    :rules="required"
     label="Data Release"
     density="compact"
     hide-details="auto"
-    @update:modelValue="update_release"
+    @update:modelValue="store.update_release"
   ></v-autocomplete>
 </template>
 
@@ -15,7 +16,7 @@
 // see https://vuejs.org/guide/introduction.html#api-styles
 // and https://vuejs.org/api/sfc-script-setup.html
 
-import { ref } from 'vue'
+import { computed } from 'vue'
 import axios from 'axios'
 import { onMounted } from 'vue'
 import { useAppStore } from '@/store/app'
@@ -24,8 +25,17 @@ import { useAppStore } from '@/store/app'
 const store = useAppStore()
 
 // mount data, "ref" marks the data as reactive
-const select = ref('select a data release')
-let items = ref([])
+//const select = ref('select a data release')
+
+// create release items as a computed ref
+let items = computed(() => {
+  return store.get_releases()
+})
+
+// set select rules
+let required = [
+    (value: string) => !!value || 'Release required.',
+                ]
 
 async function get_releases() {
     // function to get the data release from VALIS
@@ -36,19 +46,15 @@ async function get_releases() {
             console.log(response.data)
             // remove the MPLs
             let rels = response.data.filter((rel: string) => !rel.startsWith("M")).reverse()
-            items.value = rels
+            // store the releases and check for selection
+            store.all_releases = rels
+            store.check_release()
         })
         .catch((error) => {
             console.error(error.toJSON())
-            items.value = []
         })
 }
 
-function update_release(release: string) {
-    // update the app store with the selected data release
-    store.release = release
-    console.log('updating release', release)
-}
 
 // Vue mounted lifecyle hook, i.e. when the component is mounted to the DOM
 // see https://vuejs.org/guide/essentials/lifecycle.html

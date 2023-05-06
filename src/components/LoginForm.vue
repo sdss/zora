@@ -30,6 +30,7 @@
 
 import { ref } from 'vue'
 import { useAppStore } from '@/store/app'
+import axios from 'axios'
 
 // get the application state store
 const store = useAppStore()
@@ -52,9 +53,24 @@ let passRules = [
 ]
 
 
-function login() {
+async function login() {
     // login via the valis API
     console.log('logging in now')
+    console.log(user.value, password.value)
+
+    // await axios.post('http://localhost:8000/auth/login',
+    //     {"username": user.value, "password": password.value},
+    //     {headers: {'Content-Type': 'multipart/form-data'}})
+    //     .then((response) => {
+    //         console.log(response)
+    //         console.log(response.data)
+    //     })
+    //     .catch((error) => {
+    //         console.error(error.toJSON())
+    //         reset()
+    //     })
+
+
     menu.value = false
     store.logged_in = true
     store.user = 'Brian'
@@ -67,6 +83,8 @@ function reset() {
     valid.value = false
     store.logged_in = false
     store.user = ''
+    store.check_release()
+    store.update_release(store.release)
 }
 
 </script>
