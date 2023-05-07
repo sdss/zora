@@ -6,21 +6,41 @@ export const useAppStore = defineStore('app', {
     release: '',
     all_releases: [],
     logged_in: false,
-    user: ''
+    user: {},
+    auth: {}
   }),
   actions: {
     get_releases() {
+      // get the available releases based on user login status
       return this.logged_in ? this.all_releases : this.all_releases.filter((rel: string) => rel.startsWith('DR'))
     },
 
     update_release(release: string) {
+      // update the selected release
       !release ? console.log('release cannot be null. setting to', this.all_releases[0]) : ''
       this.release = release ? release : this.all_releases[0]
       console.log('updating release', release)
     },
 
     check_release() {
-        this.release = (!this.release.startsWith("DR") && !this.logged_in) ? this.all_releases[0] : this.release
+      // check the selected release when logging out to ensure a public one is selected
+      this.release = (!this.release.startsWith("DR") && !this.logged_in) ? this.all_releases[0] : this.release
+    },
+
+    reset_user() {
+      // reset the user and auth information
+      this.user = {}
+      this.auth = {}
+    },
+
+    get_auth_hdr() {
+      // create a header entry with the token authorizaton set
+      return 'access_token' in this.auth ? {'Authorization': `Bearer ${this.auth.access_token}`} : {}
+    },
+
+    get_user() {
+      // get the username from the user member info
+      return 'username' in this.user ? this.user.username : ''
     }
   }
 })

@@ -1,14 +1,17 @@
 <template>
     <v-menu offset-y location="bottom" :close-on-content-click="false" v-model="menu">
+        <!-- login button -->
         <template v-slot:activator="{ props }">
           <v-btn v-if="!store.logged_in" v-bind="props" v-tippy="'Log in User'">
             <v-icon icon="mdi-account-arrow-right" class="ma-2" size="x-large"/>
         </v-btn>
         <v-btn v-else @click="reset" v-tippy="'Log out User'">
           <v-icon icon="mdi-account-arrow-left" class="ma-2" size="x-large"/>
-          {{ store.user }}
+          {{ store.get_user() }}
         </v-btn>
         </template>
+
+        <!-- login menu display -->
         <v-card>
           <v-form v-model="valid" fast-fail @submit.prevent="login" id="login-form">
             <v-card-title>Login</v-card-title>
@@ -35,7 +38,7 @@ import axios from 'axios'
 // get the application state store
 const store = useAppStore()
 
-// set the login data props
+// set the login data properties
 let user = ref('')
 let password = ref('')
 let valid = ref(false)
@@ -56,24 +59,35 @@ let passRules = [
 async function login() {
     // login via the valis API
     console.log('logging in now')
-    console.log(user.value, password.value)
 
-    // await axios.post('http://localhost:8000/auth/login',
-    //     {"username": user.value, "password": password.value},
-    //     {headers: {'Content-Type': 'multipart/form-data'}})
-    //     .then((response) => {
-    //         console.log(response)
-    //         console.log(response.data)
-    //     })
-    //     .catch((error) => {
-    //         console.error(error.toJSON())
-    //         reset()
-    //     })
+    await axios.post('http://localhost:8000/auth/login',
+        {"username": user.value, "password": password.value},
+        {headers: {'Content-Type': 'multipart/form-data'}})
+        .then((response) => {
+            // store the auth info
+            store.auth = response.data
+            get_user()
+        })
+        .catch((error) => {
+            console.error(error.toJSON())
+            reset()
+        })
+}
 
-
-    menu.value = false
-    store.logged_in = true
-    store.user = 'Brian'
+async function get_user() {
+    // get the user member info
+    await axios.post('http://localhost:8000/auth/user', {}, {headers: store.get_auth_hdr()})
+        .then((response) => {
+            // store the user info
+            store.user = response.data
+            // set user as logged in
+            store.logged_in = true
+            menu.value = false
+        })
+        .catch((error) => {
+            console.log(error.toJSON())
+            reset()
+        })
 }
 
 function reset() {
@@ -82,7 +96,7 @@ function reset() {
     password.value = ''
     valid.value = false
     store.logged_in = false
-    store.user = ''
+    store.reset_user()
     store.check_release()
     store.update_release(store.release)
 }
