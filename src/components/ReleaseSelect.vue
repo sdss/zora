@@ -40,7 +40,7 @@ let required = [
 async function get_releases() {
     // function to get the data release from VALIS
     // using public = false and a hard-coded public release to get all releases
-    await axios.get('http://localhost:8000/envs/releases?public=False&release=DR17')
+    await axios.get(import.meta.env.VITE_API_URL + '/envs/releases?public=False&release=DR17')
         .then((response) => {
             console.log(response)
             console.log(response.data)
