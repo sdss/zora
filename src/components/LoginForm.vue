@@ -16,9 +16,15 @@
           <v-form v-model="valid" fast-fail @submit.prevent="login" id="login-form">
             <v-card-title>Login</v-card-title>
             <v-card-text>
+              <!-- input fields -->
               <v-text-field label="User" v-model="user" :rules="userRules"></v-text-field>
               <v-text-field label="Password" v-model="password" type="password" :rules="passRules"></v-text-field>
+
+              <!-- failed login banner -->
+              <v-banner v-if="fail" class='ma-4' color="error" lines="one" icon="mdi-alert-box"><v-banner-text>Login Failed</v-banner-text></v-banner>
             </v-card-text>
+
+            <!-- login actions -->
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn type="submit" color="primary" :disabled="!valid" form="login-form">Login</v-btn>
@@ -43,6 +49,7 @@ let user = ref('')
 let password = ref('')
 let valid = ref(false)
 let menu = ref(false)
+let fail = ref(false)
 
 // form user validation rules
 let userRules = [
@@ -70,6 +77,7 @@ async function login() {
         })
         .catch((error) => {
             console.error(error.toJSON())
+            fail.value = true
             reset()
         })
 }
@@ -83,9 +91,11 @@ async function get_user() {
             // set user as logged in
             store.logged_in = true
             menu.value = false
+            fail.value = false
         })
         .catch((error) => {
             console.log(error.toJSON())
+            fail.value = true
             reset()
         })
 }
