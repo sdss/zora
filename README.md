@@ -30,42 +30,40 @@ This project is scaffolded with the following libraries:
 
 
 ## Project Setup
-
 ```
-# yarn
-yarn
-
-# npm (recommended)
+# npm
 npm install
+```
 
-# pnpm
-pnpm install
+## Installing New Dependencies
+```
+# install a new package and add it to the "dependencies" section of package.json
+npm install [package]
+
+# install a new package add  it to the "devDependencies" section of package.json
+npm install -D [package]
 ```
 
 ### Compiles and Hot-Reloads for Development
+```
+npm run dev
+```
+
+### Compiles and Minifies for Production
+```
 
 ```
-# yarn
-yarn dev
 
-# npm (recommended)
+### Compiles and Hot-Reloads for Development
+```
+# npm
 npm run dev
-
-# pnpm
-pnpm dev
 ```
 
 ### Type-Check, Compile and Minify for Production
-
 ```
-# yarn
-yarn build
-
-# npm (recommended)
+# npm
 npm run build
-
-# pnpm
-pnpm build
 ```
 
 ### Run Unit Tests with [Vitest](https://vitest.dev/)
@@ -96,14 +94,8 @@ npm run test:e2e -- --debug
 ### Lints and fixes files with [ESLint](https://eslint.org/)
 
 ```
-# yarn
-yarn lint
-
-# npm (recommended)
+# npm
 npm run lint
-
-# pnpm
-pnpm lint
 ```
 
 ### Format the Code with [Prettier](https://prettier.io/)
