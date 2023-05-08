@@ -40,7 +40,7 @@ npm install
 # install a new package and add it to the "dependencies" section of package.json
 npm install [package]
 
-# install a new package add  it to the "devDependencies" section of package.json
+# install a new package add it to the "devDependencies" section of package.json
 npm install -D [package]
 ```
 
