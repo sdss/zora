@@ -1,6 +1,6 @@
 <template>
   <v-autocomplete
-    class="release-select"
+    id="release"
     v-model="store.release"
     :items="items"
     :rules="required"
@@ -46,6 +46,8 @@ async function get_releases() {
             console.log(response.data)
             // remove the MPLs
             let rels = response.data.filter((rel: string) => !rel.startsWith("M")).reverse()
+            // remove the older DRs for now; update this to only DR19 once it's available
+            rels = rels.filter((rel: string) => rel.startsWith("DR") ? parseInt(rel.slice(2)) >= 18 : rel)
             // store the releases and check for selection
             store.all_releases = rels
             store.check_release()

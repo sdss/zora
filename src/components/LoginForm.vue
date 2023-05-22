@@ -2,10 +2,10 @@
     <v-menu offset-y location="bottom" :close-on-content-click="false" v-model="menu">
         <!-- login button -->
         <template v-slot:activator="{ props }">
-          <v-btn v-if="!store.logged_in" v-bind="props" v-tippy="'Log in User'">
+          <v-btn v-if="!store.logged_in" v-bind="props" v-tippy="'Log in User'" id="login">
             <v-icon icon="mdi-account-arrow-right" class="ma-2" size="x-large"/>
         </v-btn>
-        <v-btn v-else @click="reset" v-tippy="'Log out User'">
+        <v-btn v-else @click="reset" v-tippy="'Log out User'" id="logout">
           <v-icon icon="mdi-account-arrow-left" class="ma-2" size="x-large"/>
           {{ store.get_user() }}
         </v-btn>
@@ -13,12 +13,12 @@
 
         <!-- login menu display -->
         <v-card>
-          <v-form v-model="valid" fast-fail @submit.prevent="login" id="login-form">
+          <v-form v-model="valid" fast-fail @submit.prevent="login" id="login-form" ref="form">
             <v-card-title>Login</v-card-title>
             <v-card-text>
               <!-- input fields -->
-              <v-text-field label="User" v-model="user" :rules="userRules"></v-text-field>
-              <v-text-field label="Password" v-model="password" type="password" :rules="passRules"></v-text-field>
+              <v-text-field label="User" v-model="user" :rules="userRules" id="user"></v-text-field>
+              <v-text-field label="Password" v-model="password" type="password" :rules="passRules" id="pass"></v-text-field>
 
               <!-- failed login banner -->
               <v-banner v-if="fail" class='ma-4' color="error" lines="one" icon="mdi-alert-box"><v-banner-text>Login Failed</v-banner-text></v-banner>
@@ -27,8 +27,8 @@
             <!-- login actions -->
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn type="submit" color="primary" :disabled="!valid" form="login-form">Login</v-btn>
-              <v-btn color="secondary" @click="reset">Reset</v-btn>
+              <v-btn type="submit" color="primary" :disabled="!valid" form="login-form" id="submitbtn">Login</v-btn>
+              <v-btn color="secondary" @click="reset" id="resetbtn">Reset</v-btn>
             </v-card-actions>
           </v-form>
         </v-card>
@@ -92,7 +92,7 @@ async function get_user() {
             store.logged_in = true
             menu.value = false
             fail.value = false
-        })
+          })
         .catch((error) => {
             console.log(error.toJSON())
             fail.value = true
