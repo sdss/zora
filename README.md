@@ -1,6 +1,6 @@
 # zora
 
-This template should help get you started developing with Vue 3 in Vite.
+This repo is for the new wep app front-end for SDSS-V
 
 ## Recommended IDE Setup
 
@@ -30,6 +30,7 @@ This project is scaffolded with the following libraries:
 
 
 ## Project Setup
+Git clone this repo and run the following
 ```
 # npm
 npm install
@@ -42,16 +43,6 @@ npm install [package]
 
 # install a new package and add it to the "devDependencies" section of package.json
 npm install -D [package]
-```
-
-### Compiles and Hot-Reloads for Development
-```
-npm run dev
-```
-
-### Compiles and Minifies for Production
-```
-
 ```
 
 ### Compiles and Hot-Reloads for Development
@@ -114,3 +105,23 @@ See [Vite Configuration Reference](https://vitejs.dev/config/).
 - [Awesome Vue](https://github.com/vuejs/awesome-vue)
 - [Awesome Vite](https://github.com/vitejs/awesome-vite)
 - [Awesome Vuetify](https://github.com/vuetifyjs/awesome-vuetify)
+
+## Source
+
+This repo was created using modified instructions from the Vuetify installation, using nodejs 9.5.1.
+
+1. run `npm create vuetify`
+2. Select the following options
+   1. Essentials (Vue, VueRouter, Pinia)
+   2. Select "yes" to Typescript
+   3. Select "npm" for how to install dependencies
+3. In `package.json`, update the following dependencies
+   1. In `dependencies`, update
+      1. vue: `^3.2.47`
+      2. vue-router: `^4.1.6`
+   2. In 'devDependencies', update
+      1. @vitejs/plugin-vue: `^4.0.0`
+      2. vite: `^4.2.0`
+      3. vite-plugin-vuetify: `^1.0.0`
+4. Run `npm install` to install initial package
+5. Install `Vitest`, `Playwright`, and `Vue Test Utils`
