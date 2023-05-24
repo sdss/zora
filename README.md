@@ -2,6 +2,8 @@
 
 This repo is for the new wep app front-end for SDSS-V
 
+[![Node.js CI](https://github.com/sdss/zora/actions/workflows/node.js.yml/badge.svg)](https://github.com/sdss/zora/actions/workflows/node.js.yml)
+
 ## Recommended IDE Setup
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
