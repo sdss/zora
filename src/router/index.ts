@@ -7,7 +7,7 @@ const routes = [
     component: () => import('@/layouts/default/Main.vue'),
     children: [
       {
-        path: '',
+        path: '/',
         name: 'Home',
         // route level code-splitting
         // this generates a separate chunk (home.[hash].js) for this route

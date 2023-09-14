@@ -17,15 +17,15 @@ export const useAppStore = defineStore('app', {
 
     update_release(release: string) {
       // update the selected release
-      !release ? console.log('release cannot be null. setting to', this.all_releases[0]) : ''
-      this.release = release ? release : this.all_releases[0]
+      release ? '' : console.log('release cannot be null. setting to', this.all_releases[0])
+      this.release = release || this.all_releases[0]
       console.log('updating release', release)
-      console.log(import.meta.env)
+      console.log('meta env', import.meta.env)
     },
 
     check_release() {
       // check the selected release when logging out to ensure a public one is selected
-      this.release = (!this.release.startsWith("DR") && !this.logged_in) ? this.all_releases[0] : this.release
+      this.release = (!this.release.startsWith("DR") && !this.logged_in) ? this.get_releases()[0] : this.release
     },
 
     reset_user() {

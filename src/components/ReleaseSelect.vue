@@ -42,8 +42,7 @@ async function get_releases() {
     // using public = false and a hard-coded public release to get all releases
     await axios.get(import.meta.env.VITE_API_URL + '/envs/releases?public=False&release=DR17')
         .then((response) => {
-            console.log(response)
-            console.log(response.data)
+            console.log('resp data', response.data)
             // remove the MPLs
             let rels = response.data.filter((rel: string) => !rel.startsWith("M")).reverse()
             // remove the older DRs for now; update this to only DR19 once it's available
