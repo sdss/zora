@@ -13,6 +13,7 @@
       <v-col>
         <v-btn justify="start"><RouterLink to="/">Home</RouterLink></v-btn>
         <v-btn><RouterLink to="/about">About</RouterLink></v-btn>
+        <v-btn><RouterLink to="/search">Search</RouterLink></v-btn>
       </v-col>
 
       <!-- release -->
