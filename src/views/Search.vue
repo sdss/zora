@@ -52,13 +52,13 @@
 
         <v-row>
           <v-col cols="6">
-            <v-btn rounded="lg" @click="submit_form" :disabled="!valid" size="large">Search</v-btn>
+            <v-btn rounded="lg" @click="submit_form" size="large" :disabled="!valid">Search</v-btn>
           </v-col>
           <v-col cols="6">
             <v-btn rounded="lg" @click="reset_form" size="large">Reset</v-btn>
           </v-col>
 
-          <v-banner v-if="fail" class='ma-4' color="error" lines="one" icon="mdi-alert-box"><v-banner-text>Form Failed</v-banner-text></v-banner>
+          <v-banner v-if="fail" class='ma-4' color="error" lines="one" icon="mdi-alert-box"><v-banner-text>{{ failmsg }}</v-banner-text></v-banner>
         </v-row>
       </v-container>
     </v-form>
@@ -107,6 +107,7 @@ let initFormData = {
 // create dynamic bindings to form fields
 let formData = ref({ ...initFormData })
 let fail = ref(false)
+let failmsg = ref('')
 let valid = ref(false)
 
 // events
@@ -116,8 +117,8 @@ async function submit_form(this: any) {
     // manually validate form just for safe measure
     const valid = await form.value.validate()
     if (!valid.valid) {
-      console.error("Form is not valid.  Check form inputs again.")
-      fail.value = true
+      let msg = "Form is not valid.  Check form inputs again."
+      set_fail(msg)
       return
     }
 
@@ -130,26 +131,54 @@ async function submit_form(this: any) {
         formData.value,
         {headers: {'Content-Type': 'application/json'}})
         .then((response) => {
+          // handle the initial response
             console.log(response.data)
-            console.log(response.data['data'][0])
+
+            // check for good status in response
+            if (response.data['status'] != 'success') {
+              let msg = `Response status failed: ${response.data['msg']}`
+              set_fail(msg)
+              throw new Error(msg)
+            }
+
+            // return the actual data
             fail.value = false
+            return response.data['data']
+        })
+        .then((data) => {
+          // handle the actual data results
+          console.log("new", data)
         })
         .catch((error) => {
-            console.error(error.toJSON())
-            fail.value = true
-            reset_form()
+          // catch any request failures
+
+          // check the kind of error, axios or regular string
+          let msg = (typeof error.toJSON == 'function') ? error.toJSON().message : error
+          set_fail(`Request Error: ${msg}`)
+          // reset_form()
         })
 }
 
 async function reset_form() {
-  console.log('resetting', formData.value);
-  // Reset the entire formData object to its initial state
+  // reset the form data
+
+  // reset the entire formData object to its initial state
   Object.assign(formData.value, initFormData);
 
+  // reset other values
   valid.value = false
+  fail.value = false
+  failmsg.value = ''
 
   // Reset the form validation state
   await form.value.resetValidation();
+}
+
+async function set_fail(msg : string) {
+  // set the fail flags
+  fail.value = true
+  failmsg.value = msg
+  console.error(msg)
 }
 
 </script>
