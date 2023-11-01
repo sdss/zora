@@ -10,6 +10,13 @@ import 'vuetify/styles'
 import { aliases, mdi } from "vuetify/iconsets/mdi";
 import { md3 } from "vuetify/blueprints";
 
+// Data Table
+import {
+  VDataTable,
+  VDataTableServer,
+  VDataTableVirtual,
+} from "vuetify/labs/VDataTable";
+
 // Composables
 import { createVuetify } from 'vuetify'
 
@@ -22,4 +29,9 @@ export default createVuetify({
   },
   theme: { defaultTheme: "dark" },
   blueprint: md3,
+  components: {
+    VDataTable,
+    VDataTableServer,
+    VDataTableVirtual,
+  }
 })

@@ -69,11 +69,12 @@
 import axios from 'axios'
 import { ref } from 'vue'
 import TextInput from '@/components/TextInput.vue'
-
+import { useRouter } from 'vue-router';
 import { useAppStore } from '@/store/app'
 
-// get the application state store
+// get the application state store and router
 const store = useAppStore()
+const router = useRouter()
 
 // set up a form reference, is the name in v-form ref="form"
 let form = ref(null);
@@ -148,6 +149,12 @@ async function submit_form(this: any) {
         .then((data) => {
           // handle the actual data results
           console.log("new", data)
+
+          // store the search results
+          store.save_search_results(data);
+
+          // Use Vue Router to navigate to the "results" page and pass the data as a route parameter
+          router.push({ name: 'Results' });
         })
         .catch((error) => {
           // catch any request failures

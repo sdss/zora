@@ -7,7 +7,8 @@ export const useAppStore = defineStore('app', {
     all_releases: [],
     logged_in: false,
     user: {},
-    auth: {}
+    auth: {},
+    searchResults: []
   }),
   actions: {
     get_releases() {
@@ -42,6 +43,11 @@ export const useAppStore = defineStore('app', {
     get_user() {
       // get the username from the user member info
       return 'username' in this.user ? this.user.username : ''
+    },
+
+    save_search_results(results: []) {
+      // save the search results
+      this.searchResults = results
     }
   }
 })
