@@ -23,27 +23,42 @@
                     </v-tabs>
 
                     <v-card-text>
-                    <v-window v-model="tab">
+
+                        <v-window v-model="tab">
                         <v-window-item key="meta" value="meta">
                             <v-progress-linear v-if="loading" indeterminate color="blue-lighten-3" ></v-progress-linear>
                             <v-card v-else>
                                 <v-banner v-if="nodata" type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-confused"><v-banner-text>No target information for release {{ store.release }}</v-banner-text></v-banner>
-                                <v-table v-else density="compact">
-                                    <thead>
-                                    <tr>
-                                        <th class="text-left">Parameter</th>
-                                        <th class="text-left">Value</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr
-                                        v-for="item, key in metadata"
-                                        :key="key">
-                                        <td>{{ key }}</td>
-                                        <td>{{ item }}</td>
-                                    </tr>
-                                    </tbody>
-                                </v-table>
+
+                                <v-expansion-panels v-else, v-model="panels">
+
+                                    <v-expansion-panel title="Basic Info">
+                                        <v-expansion-panel-text>
+                                            <v-data-table-virtual :headers="headmeta" :items="convert_to_table(metadata, 'vizdb')" density="compact">
+                                                <template v-slot:item.display_name="{ item }">
+                                                    <p v-tippy="item.description">{{ item.display_name }}</p>
+                                                </template>
+                                            </v-data-table-virtual>
+                                        </v-expansion-panel-text>
+                                    </v-expansion-panel>
+
+                                    <v-expansion-panel title="Boss Pipeline Info">
+                                        <v-expansion-panel-text>
+                                            <v-data-table-virtual :items="convert_object(pipelines.boss)" density="compact"></v-data-table-virtual>
+                                        </v-expansion-panel-text>
+                                    </v-expansion-panel>
+                                    <v-expansion-panel title="Apogee Pipeline Info">
+                                        <v-expansion-panel-text>
+                                            <v-data-table-virtual :items="convert_object(pipelines.apogee)" density="compact"></v-data-table-virtual>
+                                        </v-expansion-panel-text>
+                                    </v-expansion-panel>
+                                    <v-expansion-panel title="Astra Pipeline Info">
+                                        <v-expansion-panel-text>
+                                            <v-data-table-virtual :items="convert_object(pipelines.astra)" density="compact"></v-data-table-virtual>
+                                        </v-expansion-panel-text>
+                                    </v-expansion-panel>
+                                </v-expansion-panels>
+
                             </v-card>
                         </v-window-item>
 
@@ -57,6 +72,12 @@
                     </v-window>
                     </v-card-text>
                 </v-card>
+            </v-col>
+        </v-row>
+
+        <v-row>
+            <v-col md="12">
+                <v-skeleton-loader type="card"></v-skeleton-loader>
             </v-col>
         </v-row>
 
@@ -83,7 +104,9 @@ let loading = ref(true)
 let metadata = ref({})
 let sources = ref([])
 let carts = ref([])
+let pipelines = ref({})
 let cartSort = [{ key: 'run_on', order: 'desc' }]
+let panels = ref([0])
 
 let head = [
     {key: 'catalogid', title: 'CatalogID'},
@@ -93,21 +116,6 @@ let head = [
     {key: 'dec_catalogid', title: 'Dec'},
     {key: 'n_associated', title: 'N_Associated'}
 ]
-// let catalogs = [
-//   {
-//     "sdss_id": 23326,
-//     "ra_sdss_id": 315.780029296875,
-//     "dec_sdss_id": -3.2131478212519653,
-//     "catalogid": 27021603187129892,
-//     "n_associated": 1,
-//     "ra_catalogid": 315.780029296875,
-//     "dec_catalogid": -3.2131478212519653,
-//     "version": 25,
-//     "lead": "skies_v2",
-//     "ra": 315.780029296875,
-//     "dec": -3.2131478212519653
-//   }
-// ]
 
 function formatNumber (num, digit) {
     if (num == null) {
@@ -125,6 +133,12 @@ let headcart = [
     {key: 'run_on', title: 'Date Run On'},
 ]
 
+let headmeta = [
+    {key: 'display_name', title: 'Display Name'},
+    {key: 'column_name', title: 'Column Name'},
+    {key: 'value', title: 'Value'},
+]
+
 async function get_target_info() {
     console.time('Info Time');
 
@@ -135,7 +149,8 @@ async function get_target_info() {
     let endpoints = [
         import.meta.env.VITE_API_URL + `/target/ids/${sdss_id}?release=${rel}`,
         import.meta.env.VITE_API_URL + `/target/cartons/${sdss_id}?release=${rel}`,
-        import.meta.env.VITE_API_URL + `/target/catalogs/${sdss_id}?release=${rel}`
+        import.meta.env.VITE_API_URL + `/target/catalogs/${sdss_id}?release=${rel}`,
+        import.meta.env.VITE_API_URL + `/target/pipelines/${sdss_id}?release=${rel}`
         ]
 
     // axios config
@@ -155,18 +170,64 @@ async function get_target_info() {
 
     // await the promises
     await Promise.all(endpoints.map((endpoint) => axios.get(endpoint, config)))
-    .then(([{data: target}, {data: cartons}, {data: catalogs}] )=> {
-      console.log({ target, cartons, catalogs });
+    .then(([{data: target}, {data: cartons}, {data: catalogs}, {data: pipes}] )=> {
+      console.log({ target, cartons, catalogs, pipes });
       loading.value = false
       nodata.value = Object.keys(target).length === 0
       metadata.value = target
       carts.value = cartons
       sources.value = catalogs
+      pipelines.value = pipes
       console.timeEnd('Info Time');
+    })
+    .catch((error) => {
+        console.error(error.toJSON().message)
+    })
+}
+
+async function get_db_info() {
+
+    if (Object.keys(store.db_info).length !== 0) {
+        console.log('db info already loaded')
+        return
+    }
+
+    await axios.get(import.meta.env.VITE_API_URL + '/info/database')
+        .then((response) => {
+            console.log('db info', response.data)
+            // store the db metadata
+            store.db_info = response.data
+        })
+        .catch((error) => {
+            console.error(error.toJSON())
+        })
+}
+
+function convert_object( metadata) {
+    // temp function for converting to table
+    return Object.entries(metadata).map(([key, value]) => ({ key, value }))
+}
+
+function convert_to_table(dataObject, name) {
+    // convert target data to v-data-table items with db metadata
+    let mappingObject = store.db_info[name]
+    return Object.entries(dataObject).map(([key, value]) => {
+        //const mapping = Object.values(mappingObject).find(db => db[key])?.[key];
+        const mapping = mappingObject[key]
+        return {
+            display_name: mapping?.display_name || '',
+            column_name: mapping?.column_name || key,
+            value: value,
+            description: mapping?.description || ''
+
+        }
     })
 }
 
 onMounted(() => {
+    // get database info
+    get_db_info()
+
     // get the available target info
     get_target_info()
 })
