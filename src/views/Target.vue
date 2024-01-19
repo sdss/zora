@@ -12,7 +12,8 @@
                     <span class="font-weight-bold">RA, Dec:</span>
                     {{ formatNumber(metadata.ra_sdss_id, 5) }}, {{ formatNumber(metadata.dec_sdss_id, 5) }}
                 </p>
-                <v-img :width="300" cover class="bg-grey-lighten-2" src="https://picsum.photos/200"></v-img>
+                <v-skeleton-loader v-if="loading" type="card"></v-skeleton-loader>
+                <aladin-lite v-else :ra=metadata.ra_sdss_id :dec=metadata.dec_sdss_id></aladin-lite>
             </v-col>
             <v-col md="9">
                 <v-card>
@@ -26,10 +27,10 @@
 
                         <v-window v-model="tab">
                         <v-window-item key="meta" value="meta">
-                            <v-progress-linear v-if="loading" indeterminate color="blue-lighten-3" ></v-progress-linear>
+                            <v-progress-linear v-if="loading && !iserror" indeterminate color="blue-lighten-3" ></v-progress-linear>
                             <v-card v-else>
                                 <v-banner v-if="nodata" type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-confused"><v-banner-text>No target information for release {{ store.release }}</v-banner-text></v-banner>
-
+                                <v-banner v-else-if="iserror" type="error" class='ma-4' color="error" lines="one" icon="mdi-emoticon-confused"><v-banner-text>{{ iserror }}</v-banner-text></v-banner>
                                 <v-expansion-panels v-else, v-model="panels">
 
                                     <v-expansion-panel title="Basic Info">
@@ -75,11 +76,13 @@
             </v-col>
         </v-row>
 
-        <v-row>
-            <v-col md="12">
-                <v-skeleton-loader type="card"></v-skeleton-loader>
+        <!-- <v-row>
+            <v-col md="12" class="solara-con">
+                <v-skeleton-loader v-if="loading" type="card"></v-skeleton-loader>
+                <v-banner v-else-if="!store.is_allowed()" type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-confused"><v-banner-text>User not allowed to access spectra data.</v-banner-text></v-banner>
+                <Solara v-else></Solara>
             </v-col>
-        </v-row>
+        </v-row> -->
 
     </v-container>
 </template>
@@ -92,6 +95,10 @@ import { useRoute } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import JSONbig from 'json-big'
 
+//import Jdaviz from '@/components/Jdaviz.vue'
+//import Solara from '@/components/Solara.vue'
+import AladinLite from '@/components/AladinLite.vue'
+
 // get the application state store and router
 const store = useAppStore()
 const route = useRoute()
@@ -100,6 +107,7 @@ const sdss_id = route.params.sdss_id
 const missingId = !sdss_id
 const tab = ref(null)
 let nodata = ref(false)
+let iserror = ref(false)
 let loading = ref(true)
 let metadata = ref({})
 let sources = ref([])
@@ -142,7 +150,6 @@ let headmeta = [
 async function get_target_info() {
     console.time('Info Time');
 
-    //let sdss_id = 23326
     let rel = "IPL3"
 
     // set up API call endpoints
@@ -182,6 +189,11 @@ async function get_target_info() {
     })
     .catch((error) => {
         console.error(error.toJSON().message)
+        let msg = error.toJSON().message
+        if (msg == 'Network Error') {
+            msg = 'Network Error: error connecting to backend server.'
+        }
+        iserror.value = msg
     })
 }
 
