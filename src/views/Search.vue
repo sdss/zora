@@ -1,5 +1,5 @@
 <template>
-    <v-form v-model="valid" fast-fail @submit.prevent ref="form">
+    <v-form fast-fail @submit.prevent ref="form" validate-on="input">
       <v-container>
         <v-row>
           <!-- width of all columns in a row should add up to 12 ;  see Vuetify Grid -->
@@ -37,24 +37,38 @@
           </v-col>
         </v-row>
         <v-row>
-            <v-col cols="12" md="6">
+            <v-col cols="4" md="4">
             <!-- search id field -->
             <text-input
-              v-model="formData.ids"
+              v-model="formData.id"
               label="ID Search"
-              placeholder="14442699"
+              placeholder="23326"
               hint="Enter an SDSS identifier"
               :rules="idRules"
               id="id"
             />
           </v-col>
+          <v-col cols="4" md="4">
+            <dropdown-select label="Programs" id="programs" :items="store.programs" v-model="formData.program"/>
+          </v-col>
+          <v-col cols="4" md="4">
+            <dropdown-select label="Cartons" id="cartons" :items="store.cartons" v-model="formData.carton"/>
+          </v-col>
         </v-row>
 
         <v-row>
-          <v-col cols="6">
-            <v-btn rounded="lg" @click="submit_form" size="large" :disabled="!valid">Search</v-btn>
+          <v-col cols="4">
+            <v-btn rounded="lg" color='primary' @click="submit_form" size="large" :disabled="!valid" :append-icon="valid ? 'mdi-check-circle' : 'mdi-close-circle'">Search
+              <template v-slot:append>
+                <v-icon size='large' :color="!valid ? 'error' : 'success'"></v-icon>
+              </template>
+            </v-btn>
           </v-col>
-          <v-col cols="6">
+          <v-col cols="4">
+            <v-btn color="warning" rounded="lg" @click="revalidate" size="large">Revalidate
+            </v-btn>
+          </v-col>
+          <v-col cols="4">
             <v-btn rounded="lg" @click="reset_form" size="large">Reset</v-btn>
           </v-col>
 
@@ -67,8 +81,9 @@
 <script setup lang="ts">
 
 import axios from 'axios'
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import TextInput from '@/components/TextInput.vue'
+import DropdownSelect from '@/components/DropdownSelect.vue';
 import { useRouter } from 'vue-router';
 import { useAppStore } from '@/store/app'
 
@@ -81,19 +96,28 @@ let form = ref(null);
 
 // set up validation rules
 
+const exclusiveFieldRule = () => {
+  const coordsFilled = !!formData.value.coords.trim()
+  const idFilled = !!formData.value.id.trim()
+  const good = (coordsFilled && !idFilled) || (!coordsFilled && idFilled)
+  return good || 'Either Coordinate or ID must be filled, but not both.'
+};
+
 // coordinate regex
 const re = /([0-9.hms\s:]+),\s*([+-]?[0-9.dms\s:]+)/gm;
 
 let coordRules = [
-  (value: string) => !!value || 'Required field.',
-  (value: string) => value.match(re) != null || 'Value does not match sky coordinate regex',
-
-];
+  // (value: string) => !!value || 'Required field.',
+  exclusiveFieldRule,
+  (value: string) => {
+    if (!value) return true
+    return value.match(re) != null || 'Value does not match sky coordinate regex'
+  },
+]
 let radiusRules = [
-  (value: number) => !!value || 'Required field.',
   (value: number) => !isNaN(value) || 'Value must be a number.',
-];
-let idRules: [] = []
+]
+let idRules = [exclusiveFieldRule] //[(value: number) => !!value || 'Required field.']
 
 // create initial state of formData
 let initFormData = {
@@ -101,30 +125,42 @@ let initFormData = {
   ra: '',
   dec: '',
   radius: '',
-  ids: '',
+  id: '',
   units: 'degree',
-  release: store.release
+  release: store.release,
+  carton: '',
+  program: ''
 }
 // create dynamic bindings to form fields
 let formData = ref({ ...initFormData })
 let fail = ref(false)
 let failmsg = ref('')
 let valid = ref(false)
+//let filteredCartons = ref([ ...store.cartons ])
+let filteredCartons = ref([])
+
+// create watcher for the form validation
+watch(formData, async () => {
+  const formValid = await form.value.validate(); // validate the form
+  valid.value = formValid.valid; // update the valid state
+}, { deep: true }); // deep watch to track nested property changes
+
 
 // events
 async function submit_form(this: any) {
     // Handle the search form submission here
 
     // manually validate form just for safe measure
-    const valid = await form.value.validate()
-    if (!valid.valid) {
+    const formValid = await form.value.validate()
+    console.log('valid form', formValid)
+    if (!formValid.valid) {
       let msg = "Form is not valid.  Check form inputs again."
       set_fail(msg)
       return
     }
 
     // extract out ra and dec fields from coords
-    [formData.value.ra, formData.value.dec] = formData.value.coords.split(',')
+    [formData.value.ra, formData.value.dec] = formData.value.coords ? formData.value.coords.split(',') : ["", ""]
     console.log('submitting', formData.value)
 
     // submit the POST request to Valis
@@ -166,8 +202,16 @@ async function submit_form(this: any) {
         })
 }
 
+async function revalidate() {
+  // revalidate the search form
+  const formValid = await form.value.validate()
+  valid.value = formValid.valid
+  console.log('valid', valid.value)
+}
+
 async function reset_form() {
   // reset the form data
+  console.log('resetting form')
 
   // reset the entire formData object to its initial state
   Object.assign(formData.value, initFormData);
@@ -187,6 +231,50 @@ async function set_fail(msg : string) {
   failmsg.value = msg
   console.error(msg)
 }
+
+onMounted(() => {
+
+  // set up API call endpoints
+    let endpoints = [
+        import.meta.env.VITE_API_URL + `/query/list/cartons`,
+        import.meta.env.VITE_API_URL + `/query/list/programs`,
+        import.meta.env.VITE_API_URL + `/query/list/program-map`
+        ]
+
+    // check if the store already has data saved
+    if (store.cartons.length !== 0) {
+      console.log('data already loaded')
+      return
+    }
+
+    // await the promises and cache the results in the store
+    Promise.all(endpoints.map((endpoint) => axios.get(endpoint)))
+    .then(([{data: carts}, {data: progs}, {data: progmap}] )=> {
+      console.log({ carts, progs, progmap })
+      store.store_cartons(carts, progs, progmap)
+      console.log(filteredCartons)
+    })
+})
+
+// //Immediate watch with deep option if needed
+// watch(() => store.cartons, (newVal) => {
+//   filteredCartons.value = newVal;
+// }, { immediate: true, deep: true });
+
+
+// // Watch for changes in selected program
+// watch(formData.value.program, (newVal) => {
+//   console.log('watching', newVal)
+//   if (newVal && store.program_map[newVal]) {
+//     filteredCartons.value = store.program_map[newVal].map(carton => {
+//       console.log('inside here')
+//       return store.cartons.find(item => item.id === carton)
+//     }).filter(Boolean);
+//   } else {
+//     console.log('skipping, returning full cartons', store.cartons)
+//     filteredCartons.value = store.cartons
+//   }
+// }, { immediate: true, deep: true })
 
 </script>
 
