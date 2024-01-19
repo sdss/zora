@@ -8,7 +8,12 @@ export const useAppStore = defineStore('app', {
     logged_in: false,
     user: {},
     auth: {},
-    searchResults: []
+    searchResults: [],
+    cartons: [],
+    programs: [],
+    program_map: {},
+    carton_map: {},
+    db_info: {}
   }),
   actions: {
     get_releases() {
@@ -48,6 +53,27 @@ export const useAppStore = defineStore('app', {
     save_search_results(results: []) {
       // save the search results
       this.searchResults = results
+    },
+
+    store_cartons(cartons: [], programs: [], progmap: {}) {
+      // save the carton and program lists
+      this.cartons = cartons
+      this.programs = programs
+      this.program_map = progmap
+
+      // reverse the map
+      this.carton_map = Object.entries(this.program_map).reduce((acc, [key, values]) => {
+        values.forEach(value => {
+          acc[value] = acc[value] ? [...acc[value], key] : [key]
+        })
+        return acc
+      }, {})
+    },
+
+    is_allowed() {
+      // checks if a user is logged in or if the release is public
+      return this.logged_in || (!this.logged_in && this.release.startsWith("DR"))
     }
+
   }
 })
