@@ -76,13 +76,15 @@
             </v-col>
         </v-row>
 
-        <!-- <v-row>
+        <!-- spectral display -->
+        <v-row>
             <v-col md="12" class="solara-con">
                 <v-skeleton-loader v-if="loading" type="card"></v-skeleton-loader>
                 <v-banner v-else-if="!store.is_allowed()" type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-confused"><v-banner-text>User not allowed to access spectra data.</v-banner-text></v-banner>
-                <Solara v-else></Solara>
+                <v-banner v-else-if="!has_files" type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-cry"><v-banner-text>No spectral data available to load.</v-banner-text></v-banner>
+                <Solara v-else :sdssid="sdss_id" :files="files"></Solara>
             </v-col>
-        </v-row> -->
+        </v-row>
 
     </v-container>
 </template>
@@ -95,8 +97,7 @@ import { useRoute } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import JSONbig from 'json-big'
 
-//import Jdaviz from '@/components/Jdaviz.vue'
-//import Solara from '@/components/Solara.vue'
+import Solara from '@/components/Solara.vue'
 import AladinLite from '@/components/AladinLite.vue'
 
 // get the application state store and router
@@ -115,6 +116,8 @@ let carts = ref([])
 let pipelines = ref({})
 let cartSort = [{ key: 'run_on', order: 'desc' }]
 let panels = ref([0])
+let files = ref([])
+let has_files = ref(false)
 
 let head = [
     {key: 'catalogid', title: 'CatalogID'},
@@ -178,14 +181,16 @@ async function get_target_info() {
     // await the promises
     await Promise.all(endpoints.map((endpoint) => axios.get(endpoint, config)))
     .then(([{data: target}, {data: cartons}, {data: catalogs}, {data: pipes}] )=> {
-      console.log({ target, cartons, catalogs, pipes });
+      console.log({ target, cartons, catalogs, pipes })
       loading.value = false
       nodata.value = Object.keys(target).length === 0
       metadata.value = target
       carts.value = cartons
       sources.value = catalogs
       pipelines.value = pipes
-      console.timeEnd('Info Time');
+      files.value = Object.values(pipes.files)
+      has_files.value = check_files(pipes.files)
+      console.timeEnd('Info Time')
     })
     .catch((error) => {
         console.error(error.toJSON().message)
@@ -195,6 +200,13 @@ async function get_target_info() {
         }
         iserror.value = msg
     })
+}
+
+function check_files(data) {
+    // check if the files array is empty or not
+    let vals = Object.values(data)
+    let empty = vals.length == 1 && vals.includes('')
+    return empty ? false : true
 }
 
 async function get_db_info() {
