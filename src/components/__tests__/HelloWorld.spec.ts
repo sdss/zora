@@ -11,6 +11,6 @@ describe('HelloWorld', () => {
 
   it('renders properly', () => {
     const wrapper = mount(HelloWorld, { global: { plugins: [vuetify] } })
-    expect(wrapper.text()).toContain('Welcome toVuetify')
+    expect(wrapper.text()).toContain('Welcome toSDSS')
   })
 })
