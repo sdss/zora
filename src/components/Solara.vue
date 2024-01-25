@@ -9,10 +9,7 @@
 
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
-import { useAppStore } from '@/store/app'
-import { validate } from '@babel/types';
 
-const store = useAppStore()
 
 // define which properties are passed in from the parent, i.e. ":xxx"
 const props = defineProps<{
