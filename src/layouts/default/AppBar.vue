@@ -18,13 +18,14 @@
 
       <!-- page links -->
       <v-col class="d-none d-sm-flex">
-        <v-btn justify="start"><RouterLink to="/">Home</RouterLink></v-btn>
-        <v-btn><RouterLink to="/about">About</RouterLink></v-btn>
-        <v-btn><RouterLink to="/search">Search</RouterLink></v-btn>
+        <v-btn v-for="(item, i) in links" :key="i" :value="item"
+          :prepend-icon="item.icon">
+          <RouterLink :to="item.site">{{item.text}}</RouterLink>
+        </v-btn>
       </v-col>
 
       <v-spacer></v-spacer>
-      <!-- release -->
+      <!-- release select -->
       <v-col cols="2" md="2" sm="3" class="d-none d-sm-flex">
         <release-select />
       </v-col>
@@ -39,20 +40,29 @@
     </v-row>
   </v-app-bar>
 
+  <!-- navigation drawer for small screens -->
   <v-navigation-drawer v-model="drawer" app temporary :width="175">
     <v-list>
+      <!-- header -->
       <v-list-item>
         <span>SDSS</span>
       </v-list-item>
-      <v-list-item link>
-        <v-list-item-content><RouterLink to="/">Home</RouterLink></v-list-item-content>
+
+      <!-- page links -->
+      <v-list-item
+        v-for="(item, i) in links"
+        :key="i"
+        :value="item"
+        link
+      >
+        <template v-slot:prepend>
+          <v-icon :icon="item.icon" size="small"></v-icon>
+        </template>
+
+        <v-list-item-content><RouterLink :to="item.site">{{ item.text }}</RouterLink></v-list-item-content>
       </v-list-item>
-      <v-list-item link>
-        <v-list-item-content><RouterLink to="/about">About</RouterLink></v-list-item-content>
-      </v-list-item>
-      <v-list-item link>
-        <v-list-item-content><RouterLink to="/search">Search</RouterLink></v-list-item-content>
-      </v-list-item>
+
+      <!-- release select -->
       <v-list-item>
         <release-select />
       </v-list-item>
@@ -70,6 +80,12 @@ import { useTheme } from 'vuetify'
 
 const drawer = ref(false);
 const theme = useTheme()
+
+const links = [
+        { text: 'Home', icon: 'mdi-home', site: '/' },
+        { text: 'About', icon: 'mdi-help', site: '/about' },
+        { text: 'Search', icon: 'mdi-magnify', site: '/search' },
+      ]
 
 function toggleTheme () {
   theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
