@@ -59,7 +59,7 @@
           <v-icon :icon="item.icon" size="small"></v-icon>
         </template>
 
-        <v-list-item-content><RouterLink :to="item.site">{{ item.text }}</RouterLink></v-list-item-content>
+        <v-list-item-title><RouterLink :to="item.site">{{ item.text }}</RouterLink></v-list-item-title>
       </v-list-item>
 
       <!-- release select -->

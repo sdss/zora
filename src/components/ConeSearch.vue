@@ -83,7 +83,7 @@ function parseInput(input: string): [string, string, { radius: number, units: st
 }
 
 function callApi(ra: string, dec: string, { radius, units }: { radius: number, units: string }): void {
-    const endpoint = `http://localhost:8000/query/cone?ra=${ra}&dec=${dec}&radius=${radius}&units=${units}`;
+    const endpoint = import.meta.env.VITE_API_URL + `/query/cone?ra=${ra}&dec=${dec}&radius=${radius}&units=${units}`
     axios.get(endpoint)
         .then(response => {
         // Handle the response data

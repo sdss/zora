@@ -29,41 +29,11 @@
 
       <!-- Resource Links Section -->
       <v-row>
-        <v-col cols="12">
-          <h2>Resources</h2>
-        </v-col>
-        <v-col cols="12" sm="4">
-          <v-card color="indigo-lighten-1">
-            <v-card-title>Data Access</v-card-title>
-            <v-card-text>
-              Description and link to data access.
-            </v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="12" sm="4">
-          <v-card variant="tonal" class="custom-card-hover">
-            <v-card-title>Python Package Documentation</v-card-title>
-            <v-card-text>
-              Overview and link to Python documentation.
-            </v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="12" sm="4">
-          <v-card class="custom-card-hover">
-            <v-card-title>FastAPI Documentation</v-card-title>
-            <v-card-text>
-              Details and link to FastAPI documentation.
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-
-      <v-row>
       <v-col cols="12">
         <h2>Resources</h2>
       </v-col>
       <v-col cols="12" sm="4" v-for="(resource, index) in resources" :key="index">
-        <v-card color='secondary-darken-1' class="custom-card-hover">
+        <v-card color='primary-darken-1' class="custom-card-hover" link :href="resource.link" target="_blank">
           <v-card-title>{{ resource.title }}</v-card-title>
           <v-card-text>
             {{ resource.description }}
@@ -85,35 +55,59 @@
 
   <script lang="ts" setup>
 
-import { ref } from 'vue'
+import { ref, watch, onMounted } from 'vue'
+import { useTheme } from 'vuetify'
+
+const theme = useTheme()
 
 const resources = ref([
   {
     title: 'Data Access',
-    description: 'Description and link to data access.',
-    link: 'http://example.com/data-access'
+    description: 'Access SDSS data directly from the Science Archive Server',
+    link: 'https://data.sdss.org/sas'
   },
   {
     title: 'Python Package Documentation',
-    description: 'Overview and link to Python documentation.',
-    link: 'http://example.com/python-docs'
+    description: 'The POC sdss-brain package provides pythonic access to SDSS-V data products',
+    link: 'https://sdss-brain.readthedocs.io/en/latest/'
   },
   {
-    title: 'FastAPI Documentation',
-    description: 'Details and link to FastAPI documentation.',
-    link: 'http://example.com/fastapi-docs'
+    title: 'Valis Documentation',
+    description: 'The FastAPI backend that powers this site.',
+    link: import.meta.env.VITE_API_URL + '/docs'
   },
   // Add more resources as needed
-]);
+])
+
+
+const setBoxShadowColor = () => {
+  const color = theme.current.value.dark ? 'var(--box-shadow-dark)' : 'var(--box-shadow-light)';
+  document.documentElement.style.setProperty('--box-shadow-color', color);
+}
+
+onMounted(() => {
+  setBoxShadowColor(); // Set the initial box-shadow color
+})
+
+watch(() => theme.current.value, () => {
+  setBoxShadowColor(); // Update the box-shadow color when the theme changes
+})
 
   // Your existing script
   </script>
 
   <style>
   /* Add any additional styling here if needed */
-  .custom-card-hover:hover {
-  background-color: rgba(255, 255, 255, 0.1); /* Lighter shade on hover */
-  /* Optionally, add a shadow or border for more emphasis */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  :root {
+  --box-shadow-light: 0px 4px 8px rgba(0, 0, 0, 0.6); /* Darker shadow for light theme */
+  --box-shadow-dark: 0px 4px 8px rgba(255, 255, 255, 0.6); /* Lighter shadow for dark theme */
+}
+
+.custom-card-hover {
+  transition: box-shadow 0.3s ease;
+}
+
+.custom-card-hover:hover {
+  box-shadow: var(--box-shadow-color); /* Use the variable */
 }
   </style>
