@@ -4,54 +4,45 @@
       <v-img height="300" src="@/assets/sdssv_logo.png" />
 
       <div class="text-body-2 font-weight-light mb-n1">Welcome to</div>
-
       <h1 class="text-h2 font-weight-bold">SDSS</h1>
 
       <div class="py-14" />
 
-      <v-row class="d-flex align-center justify-center">
-        <v-col cols="auto">
-          <v-btn
-            href="https://vuetifyjs.com/components/all/"
-            min-width="164"
-            rel="noopener noreferrer"
-            target="_blank"
-            variant="text"
-          >
-            <v-icon icon="mdi-view-dashboard" size="large" start />
-
-            Components
-          </v-btn>
+      <v-row justify="center" class="d-flex align-stretch">
+        <!-- Search Page Card -->
+        <v-col cols="12" sm="6" md="4">
+          <v-card class="pa-5 d-flex flex-column" hover>
+            <v-card-title>Search</v-card-title>
+            <v-card-text>
+              Perform a quick cone search or go to the full search.
+              <ConeSearch></ConeSearch>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn color="primary" to="/search">Go to Full Search</v-btn>
+            </v-card-actions>
+          </v-card>
         </v-col>
 
-        <v-col cols="auto">
-          <v-btn
-            color="primary"
-            href="https://vuetifyjs.com/introduction/why-vuetify/#feature-guides"
-            min-width="228"
-            rel="noopener noreferrer"
-            size="x-large"
-            target="_blank"
-            variant="flat"
-          >
-            <v-icon icon="mdi-speedometer" size="large" start />
-
-            Get Started
-          </v-btn>
-        </v-col>
-
-        <v-col cols="auto">
-          <v-btn
-            href="https://community.vuetifyjs.com/"
-            min-width="164"
-            rel="noopener noreferrer"
-            target="_blank"
-            variant="text"
-          >
-            <v-icon icon="mdi-account-group" size="large" start />
-
-            Community
-          </v-btn>
+        <!-- Target Investigation Card -->
+        <v-col cols="12" sm="6" md="4">
+          <v-card class="pa-5 d-flex flex-column align-stretch" hover style='height:100%'>
+            <v-card-title>Know a SDSS target ID?</v-card-title>
+            <v-card-text>
+              Input the SDSS ID of your target to go directly there
+              <v-text-field class="pt-2"
+                label="Enter SDSS ID"
+                outlined
+                dense
+                clearable
+                v-model="targetId"
+                @keyup.enter="navigateToTarget"
+              >
+                <template v-slot:append-inner>
+                  <v-btn color="primary" @click="navigateToTarget">Go</v-btn>
+                </template>
+              </v-text-field>
+            </v-card-text>
+          </v-card>
         </v-col>
       </v-row>
     </v-responsive>
@@ -59,5 +50,19 @@
 </template>
 
 <script lang="ts" setup>
-//
+// Script content
+
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import ConeSearch from '@/components/ConeSearch.vue'
+
+const router = useRouter();
+const targetId = ref('');
+
+const navigateToTarget = () => {
+  if (targetId.value) {
+    router.push(`/target/${targetId.value}`);
+  }
+};
+
 </script>

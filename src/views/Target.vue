@@ -31,7 +31,7 @@
                             <v-card v-else>
                                 <v-banner v-if="nodata" type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-confused"><v-banner-text>No target information for release {{ store.release }}</v-banner-text></v-banner>
                                 <v-banner v-else-if="iserror" type="error" class='ma-4' color="error" lines="one" icon="mdi-emoticon-confused"><v-banner-text>{{ iserror }}</v-banner-text></v-banner>
-                                <v-expansion-panels v-else, v-model="panels">
+                                <v-expansion-panels v-else v-model="panels">
 
                                     <v-expansion-panel title="Basic Info">
                                         <v-expansion-panel-text>
