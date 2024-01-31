@@ -13,9 +13,7 @@
       <template v-slot:prepend>
         <v-icon icon='mdi-help' size='small'
         v-tippy="{content:'Enter a RA, Dec coordinate and optional radius, in format: [number][d/m/s]',
-        placement:'left',
-        }"
-></v-icon>
+        placement:'left'}"></v-icon>
       </template>
       <template v-slot:append-inner>
         <v-btn
@@ -28,16 +26,16 @@
 
 <script lang="ts" setup>
 
-import { ref, Ref } from 'vue';
-import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { ref, Ref } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
 import { useAppStore } from '@/store/app'
 
 // get the application state store and router
 const store = useAppStore()
 const router = useRouter()
 
-const searchQuery: Ref<string> = ref('');
+const searchQuery: Ref<string> = ref('')
 
 const validationRules = [
     (v: string) => validateInput(v) || 'Input format is incorrect'
@@ -56,11 +54,11 @@ function validateInput(value: string): boolean {
 }
 
 
-function onSearch(): void {
+async function onSearch(): Promise<void> {
     if (isValid.value) {
         const [ra, dec, radius] = parseInput(searchQuery.value);
         if (ra && dec && radius) {
-        callApi(ra, dec, radius);
+        await callApi(ra, dec, radius);
         }
     }
 }
@@ -82,9 +80,9 @@ function parseInput(input: string): [string, string, { radius: number, units: st
     return [ra, dec, { radius, units }];
 }
 
-function callApi(ra: string, dec: string, { radius, units }: { radius: number, units: string }): void {
+async function callApi(ra: string, dec: string, { radius, units }: { radius: number, units: string }): Promise<void> {
     const endpoint = import.meta.env.VITE_API_URL + `/query/cone?ra=${ra}&dec=${dec}&radius=${radius}&units=${units}`
-    axios.get(endpoint)
+    await axios.get(endpoint)
         .then(response => {
         // Handle the response data
 
@@ -99,4 +97,4 @@ function callApi(ra: string, dec: string, { radius, units }: { radius: number, u
         console.error('API call error:', error)
         });
 }
-  </script>
+</script>
