@@ -37,7 +37,7 @@
           </v-col>
         </v-row>
         <v-row>
-            <v-col cols="4" md="4">
+            <v-col cols="12" md="3">
             <!-- search id field -->
             <text-input
               v-model="formData.id"
@@ -48,11 +48,18 @@
               id="id"
             />
           </v-col>
-          <v-col cols="4" md="4">
+          <v-col cols="12" md="3">
             <dropdown-select label="Programs" id="programs" :items="store.programs" v-model="formData.program"/>
           </v-col>
-          <v-col cols="4" md="4">
+          <v-col cols="12" md="3">
             <dropdown-select label="Cartons" id="cartons" :items="store.cartons" v-model="formData.carton"/>
+          </v-col>
+          <v-col cols="12" md="3">
+            <v-btn-toggle multiple divided rounded="0" density="default" v-model="formData.mapper">
+              <v-btn value="bhm">BHM</v-btn>
+              <v-btn value="mwm">MWM</v-btn>
+              <v-btn value="lwm">LWM</v-btn>
+            </v-btn-toggle>
           </v-col>
         </v-row>
 
@@ -129,7 +136,8 @@ let initFormData = {
   units: 'degree',
   release: store.release,
   carton: '',
-  program: ''
+  program: '',
+  mapper: ['bhm', 'mwm', 'lwm']
 }
 // create dynamic bindings to form fields
 let formData = ref({ ...initFormData })
