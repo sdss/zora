@@ -37,7 +37,7 @@
           </v-col>
         </v-row>
         <v-row>
-            <v-col cols="12" md="3">
+          <v-col cols="12" md="6">
             <!-- search id field -->
             <text-input
               v-model="formData.id"
@@ -48,6 +48,16 @@
               id="id"
             />
           </v-col>
+          <v-col cols="12" md="6">
+            <v-file-input
+              v-model="formData.fileTargets"
+              show-size
+              label="Upload a list of targets"
+              variant="outlined">
+            </v-file-input>
+          </v-col>
+        </v-row>
+        <v-row>
           <v-col cols="12" md="3">
             <dropdown-select label="Programs" id="programs" :items="store.programs" v-model="formData.program"/>
           </v-col>
@@ -137,7 +147,8 @@ let initFormData = {
   release: store.release,
   carton: '',
   program: '',
-  mapper: ['bhm', 'mwm', 'lwm']
+  mapper: ['bhm', 'mwm', 'lwm'],
+  fileTargets: [],
 }
 // create dynamic bindings to form fields
 let formData = ref({ ...initFormData })
