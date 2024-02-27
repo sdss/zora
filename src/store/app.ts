@@ -127,7 +127,6 @@ export const useSearchStore = defineStore('search', {
       axios
         .get(url)
         .then((response) => {
-          console.log('debug1');
           switch (this.resolverServer) {
             case 'simbad':
               res = parseSimbadResponse(response.data)

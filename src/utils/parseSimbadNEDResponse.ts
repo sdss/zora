@@ -41,8 +41,7 @@ export function parseSimbadResponse(data: any): ResponsePayload {
 
 
 export function parseNEDResponse(data: any): ResponsePayload {
-  console.log(data);
-  
+
   // Parse the XML string into an XMLDocument
   const parser = new DOMParser()
   const xmlDoc = parser.parseFromString(data, 'text/xml')
