@@ -5,13 +5,25 @@
                 <h1>Results</h1>
             </v-col>
         </v-row>
+        <v-row dense>
+            <v-col cols="2">
+                <v-select
+                    v-model="exportas"
+                    :items="['CSV', 'JSON']"
+                    label="Export table"
+                    outlined
+                    @update:modelValue="handleExport"
+                ></v-select>
+            </v-col>
+        </v-row>
+
         <v-row v-if="nodata">
             <v-col md="12">
                 <v-banner class='ma-4' color="error" lines="one" icon="mdi-emoticon-sad"><v-banner-text>{{ msg }}</v-banner-text></v-banner>
             </v-col>
         </v-row>
 
-      <v-row>
+      <v-row dense>
         <v-col md="12">
             <v-data-table
                 v-model="selected"
@@ -19,11 +31,39 @@
                 :items="data"
                 show-select
                 return-object
+                select-strategy="all"
                 fixed-header
                 hover
                 height="500"
                 density="compact"
+                :search="search"
             >
+            <template v-slot:top>
+                <v-toolbar flat density="compact" color="surface">
+                <v-card color="surface" variant="flat" class="ma-1">
+                    Counts:
+                    <v-chip class='rounded-lg' color="primary-darken-1" variant="flat">
+                        Total: {{ data.length }}
+                    </v-chip>
+                    <v-chip class='rounded-lg' color="secondary-darken-1" variant="flat">
+                        Selected: {{ selected.length }}
+                    </v-chip>
+                </v-card>
+                <v-spacer></v-spacer>
+                <v-text-field
+                    v-model="search"
+                    label="Filter results"
+                    prepend-inner-icon="mdi-magnify"
+                    single-line
+                    variant="outlined"
+                    color="primary"
+                    hide-details
+                ></v-text-field>
+
+                </v-toolbar>
+            </template>
+
+            <!-- adds a target page link to the sdss id column -->
             <template v-slot:item.sdss_id="{ item }">
                 <router-link :to="{ name: 'target', params: { sdss_id: item.sdss_id } }" target="_blank">{{ item.sdss_id }}</router-link>
             </template>
@@ -68,6 +108,12 @@ const selected = ref([])
 const headers = ref([])
 const nodata = ref(false)
 const msg = ref('')
+const exportas = ref(null)
+const search = ref('')
+
+// 315.014, 25.299 (one row)
+// 278.232, 3.788, (19 rows) 0.05
+//
 // const headers = ref([
 //   { title: 'sdss_id', key: 'sdss_id', type: 'number' },
 //   { title: 'RA', key: 'ra_sdss_id', type: 'number' },
@@ -82,7 +128,7 @@ const msg = ref('')
 //   // Add more header objects for other fields as needed
 // ]);
 
-// const results = ref([{'sdss_id': 47510284,
+// const results = [{'sdss_id': 47510284,
 //   'catalogid21': 7613823349,
 //   'catalogid25': null,
 //   'catalogid31': null,
@@ -216,7 +262,54 @@ const msg = ref('')
 //   'dec_sdss_id': 35.30448789493567,
 //   'in_boss': false,
 //   'in_apogee': false,
-//   'in_astra': false}])
+//   'in_astra': false}]
+
+const downloadBlob = (data: Array<Object>, filename: string, mimeType: string) => {
+    // download the data as a file blob
+    const blob = new Blob([data], { type: mimeType })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.click()
+    window.URL.revokeObjectURL(url)
+}
+
+const exportToCsv = () => {
+    // export the table to CSV
+    let csvRows = [];
+    // Add header
+    csvRows.push(headers.value.map(e => e.title).join(","));
+
+    // Add data
+    selected.value.forEach(row => {
+        let rowData = headers.value.map(header => JSON.stringify(row[header.key], (_, value) => {
+            // Custom formatting can go here
+            return value
+        })).join(",");
+        csvRows.push(rowData);
+    });
+
+    let csvContent = csvRows.join("\r\n");
+    const filename = "sdss_table_export.csv"
+    downloadBlob(csvContent, filename, 'text/csv; charset=utf-8;')
+}
+
+const exportToJson = () => {
+    // export the table to JSON
+    const filename = "sdss_table_export.json"
+    const jsonContent = JSON.stringify(selected.value)
+    downloadBlob(jsonContent, filename, "application/json")
+}
+
+const handleExport = () => {
+    // toggle the type of table export
+    if (exportas.value === 'CSV') {
+        exportToCsv();
+    } else if (exportas.value === 'JSON') {
+        exportToJson();
+    }
+}
 
 onMounted(() => {
     // Retrieve the data from the store
