@@ -13,7 +13,12 @@
                     {{ formatNumber(metadata.ra_sdss_id, 5) }}, {{ formatNumber(metadata.dec_sdss_id, 5) }}
                 </p>
                 <v-skeleton-loader v-if="loading" type="card"></v-skeleton-loader>
-                <aladin-lite v-else :ra=metadata.ra_sdss_id :dec=metadata.dec_sdss_id></aladin-lite>
+                <aladin-lite v-else :ra="metadata.ra_sdss_id" :dec="metadata.dec_sdss_id"></aladin-lite>
+
+                <div class="d-flex flex-column">
+                    <target-resolver :ra="metadata.ra_sdss_id" :dec="metadata.dec_sdss_id"></target-resolver>
+                    <data-download :files="files"></data-download>
+                </div>
             </v-col>
             <v-col md="9">
                 <v-card>
@@ -99,6 +104,8 @@ import JSONbig from 'json-big'
 
 import Solara from '@/components/Solara.vue'
 import AladinLite from '@/components/AladinLite.vue'
+import TargetResolver from '@/components/TargetResolver.vue'
+import DataDownload from '@/components/DataDownload.vue'
 
 // get the application state store and router
 const store = useAppStore()
@@ -118,6 +125,7 @@ let cartSort = [{ key: 'run_on', order: 'desc' }]
 let panels = ref([0])
 let files = ref([])
 let has_files = ref(false)
+let dialog = ref(false)
 
 let head = [
     {key: 'catalogid', title: 'CatalogID'},

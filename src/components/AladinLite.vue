@@ -8,8 +8,8 @@ import A from 'aladin-lite'
 
 // define which properties are passed in from the parent, i.e. ":xxx"
 const props = defineProps<{
-    ra: string,
-    dec: string
+    ra: number,
+    dec: number
 }>()
 
 let aladin = null
