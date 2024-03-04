@@ -8,21 +8,6 @@
         </v-btn>
       </template>
 
-      <!-- <v-list variant="tonal">
-        <v-list-item @click.stop="showDialog('http')">
-          <v-list-item-title>Raw Files (HTTP)</v-list-item-title>
-        </v-list-item>
-        <v-list-item @click.stop="showDialog('curl')">
-          <v-list-item-title>As a CURL Script</v-list-item-title>
-        </v-list-item>
-        <v-list-item @click.stop="showDialog('rsync')">
-          <v-list-item-title>As an RSYNC Script</v-list-item-title>
-        </v-list-item>
-        <v-list-item @click.stop="showDialog('python')">
-          <v-list-item-title>With Python Code</v-list-item-title>
-        </v-list-item>
-      </v-list> -->
-
       <v-list variant="tonal">
         <v-list-item v-for="(item, index) in dloptions" :key="index" @click.stop="showDialog(item.dialog, item.code)">
           <v-list-item-title>{{item.title}}</v-list-item-title>
@@ -51,7 +36,7 @@
   </template>
 
   <script setup lang="ts">
-  import { ref, defineProps } from 'vue';
+  import { ref, defineProps, watch } from 'vue';
   import { useAppStore } from '@/store/app'
 
 const store = useAppStore()
@@ -66,6 +51,7 @@ const props = defineProps<{
   const codeSnippet = ref('')
   let copied = ref(false)
 
+  // data to populate the dropdown menu with
   let dloptions = [
     {key: 'http', title: 'With wget', value: 'http',
     dialog: 'Download via Http', code: generateCode('http')},
@@ -75,14 +61,16 @@ const props = defineProps<{
     dialog: "Download with sdss_access", code: generateCode('python')}
   ]
 
-  function showDialog(title: string, code: string) {
+function showDialog(title: string, code: string) {
+    // show the dialog window
     copied.value = false
     dialog.value = true;
     dialogTitle.value = title;
     codeSnippet.value = code;
-  }
+}
 
-  function copyToClipboard(text: string) {
+function copyToClipboard(text: string) {
+  // copy the data download text to the clipboard
   navigator.clipboard.writeText(text).then(() => {
     console.log('Text copied to clipboard');
     copied.value = true
@@ -92,6 +80,7 @@ const props = defineProps<{
 }
 
 function convertPath(path: string, key: string) {
+    // conver the filename path to a url
     const newPath = path.split("/sas/")[1]
     const route = (path.includes('ipl') || path.includes('work')) ? 'sdss5' : 'sdss'
     const user = (path.includes('ipl') || path.includes('work')) ? 'sdss5@' : ''
@@ -100,8 +89,8 @@ function convertPath(path: string, key: string) {
     return `${base}${newPath}`
 }
 
-  function generateCode(key: string) {
-
+function generateCode(key: string) {
+    // generate the code snippets for the download menu options
     let urls = props.files.map(x => convertPath(x, key))
     urls.push(urls[0])
     console.log('urls', urls)
@@ -126,6 +115,14 @@ function convertPath(path: string, key: string) {
           break
     }
     return code
-  }
+}
+
+
+watch(() => props.files, () => {
+  // Regenerate download options whenever the files prop changes
+  dloptions.forEach(option => {
+    option.code = generateCode(option.key);
+  });
+}, { immediate: true });
 
 </script>
