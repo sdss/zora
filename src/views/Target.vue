@@ -17,7 +17,7 @@
 
                 <div class="d-flex flex-column">
                     <target-resolver :ra="metadata.ra_sdss_id" :dec="metadata.dec_sdss_id"></target-resolver>
-                    <data-download :files="files"></data-download>
+                    <data-download v-if="has_files" :files="files"></data-download>
                 </div>
             </v-col>
             <v-col md="9">
@@ -196,8 +196,10 @@ async function get_target_info() {
       carts.value = cartons
       sources.value = catalogs
       pipelines.value = pipes
-      files.value = Object.values(pipes.files)
-      has_files.value = check_files(pipes.files)
+      files.value = Object.values(pipes.files).filter(x => x != null && x != '')
+      console.log('files', files.value, files.value.length)
+      has_files.value = check_files(files.value)
+      console.log('has_files', has_files.value)
       console.timeEnd('Info Time')
     })
     .catch((error) => {
@@ -212,8 +214,7 @@ async function get_target_info() {
 
 function check_files(data) {
     // check if the files array is empty or not
-    let vals = Object.values(data)
-    let empty = vals.length == 1 && vals.includes('')
+    let empty = data.length == 0 || (data.length == 1 && data.includes(''))
     return empty ? false : true
 }
 
