@@ -19,16 +19,18 @@ console.log('stuff', props.width, props.height)
 console.log('al target props', target);
 
 A.init.then(() => {
-    aladin = A.aladin('#aladin-lite-div', {target: target, fov: 0.1, survey: "P/PanSTARRS/DR1/color-z-zg-g", projection: "AIT",
+    aladin = A.aladin('#aladin-lite-div', {target: target, fov: 0.01, survey: "P/PanSTARRS/DR1/color-z-zg-g", projection: "AIT",
     cooFrame: 'ICRSd', showCooGridControl: true, showSimbadPointerControl: true, showCooGrid: false,
-    showProjectionControl: false, showFullscreenControl: false, showZoomControl: false, showStatusBar: false,
-    showSettingsControl: false});
+    showProjectionControl: false, showFullscreenControl: false, showZoomControl: false});
 
     aladin.setFovRange(0.01, 10)
 });
 </script>
 
-<!-- <style>
-/* Load the CSS file of aladin-lite */
-@import "http://aladin.u-strasbg.fr/AladinLite/api/v3/latest/aladin.min.css";
-</style> -->
+<style>
+.aladin-fov {
+    position: absolute;
+    top: 16rem !important;
+    left: 0rem !important;
+}
+</style>
