@@ -1,0 +1,15 @@
+# Ignore node_modules directory
+./zora/node_modules
+
+# Ignore build output directory
+./zora/dist
+
+# Ignore development server files
+.vite
+
+# Ignore git
+./zora/.git
+./zora/.github
+
+# Ignore tests
+**/__test__/*

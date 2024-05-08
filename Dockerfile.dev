@@ -1,0 +1,30 @@
+# Use an official Node.js runtime as the base image
+FROM node:18-slim as dev-stage
+
+# Set a label
+LABEL org.opencontainers.image.source https://github.com/sdss/zora_valis_dockers
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy package.json and package-lock.json to the container
+COPY ./zora/package*.json ./
+
+# Install app dependencies
+RUN npm install
+
+# Copy the rest of the application code to the container
+COPY ./zora .
+
+# Development environment
+FROM dev-stage as build-stage
+
+# Set a label
+LABEL org.opencontainers.image.source https://github.com/sdss/zora
+LABEL org.opencontainers.image.description "zora development image"
+
+# Export port 3000
+EXPOSE 3000
+
+# Build the Vue.js app with hot-reloading for dev
+CMD ["npm", "run", "dev", "--host"]
