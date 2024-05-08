@@ -5,13 +5,13 @@ FROM node:18-slim as build-stage
 WORKDIR /app
 
 # Copy package.json and package-lock.json to the container
-COPY zora/package*.json ./
+COPY package*.json ./
 
 # Install app dependencies
 RUN npm install
 
 # Copy the rest of the application code to the container
-COPY ./zora .
+COPY ./ .
 
 # Copy the custom .env.docker file
 COPY .env.docker .env.production

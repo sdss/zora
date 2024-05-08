@@ -1,20 +1,17 @@
 # Use an official Node.js runtime as the base image
 FROM node:18-slim as dev-stage
 
-# Set a label
-LABEL org.opencontainers.image.source https://github.com/sdss/zora_valis_dockers
-
 # Set the working directory in the container
 WORKDIR /app
 
 # Copy package.json and package-lock.json to the container
-COPY ./zora/package*.json ./
+COPY ./package*.json ./
 
 # Install app dependencies
 RUN npm install
 
 # Copy the rest of the application code to the container
-COPY ./zora .
+COPY ./ .
 
 # Development environment
 FROM dev-stage as build-stage
