@@ -35,8 +35,8 @@ export default defineConfig({
       '.vue',
     ],
   },
+  base: process.env.BASE_URL || "/",
   server: {
-    base: "/",
     port: 3000,
     host: "0.0.0.0"
   },

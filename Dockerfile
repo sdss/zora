@@ -14,7 +14,10 @@ RUN npm install
 COPY ./ .
 
 # Copy the custom .env.docker file
-COPY .env.docker .env.production
+COPY .env.production .env.production
+
+# set the base URL environment variable
+ENV BASE_URL=zora
 
 # Build the Vue.js app
 RUN npm run build

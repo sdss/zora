@@ -1,21 +1,22 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "target": "esnext",
+    "target": "ESNext",
     "useDefineForClassFields": true,
     "allowSyntheticDefaultImports": true,
     "composite": true,
-    "module": "esnext",
+    "module": "ESNext",
     "moduleResolution": "node",
     "strict": true,
     "jsx": "preserve",
     "sourceMap": false,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "lib": ["esnext", "dom"],
+    "lib": ["ESNext", "DOM"],
     "types": [
-      "node",
-      "vuetify"
+      "@types/node",
+      "vuetify",
+      "vite/client",
     ],
     "paths": {
       "@/*": ["src/*"]
