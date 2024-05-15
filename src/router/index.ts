@@ -33,6 +33,11 @@ const routes = [
         path: '/target/:sdss_id?',
         name: 'target',
         component: () => import(/* webpackChunkName: "results" */ '@/views/Target.vue')
+      },
+      {
+        path: '/dataview',
+        name: 'dataview',
+        component: () => import(/* webpackChunkName: "results" */ '@/views/DataView.vue')
       }
     ]
   }

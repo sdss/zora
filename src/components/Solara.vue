@@ -22,7 +22,7 @@ let valid = ref(false)
 let errmsg = ref('')
 
 import.meta.env.VITE_API_URL + '/info/database'
-let url = ref(import.meta.env.VITE_API_URL + `/solara/?release=IPL3&sdssid=${props.sdssid}&files=${props.files.join()}`)
+let url = ref(import.meta.env.VITE_API_URL + `/solara/embed/?release=IPL3&sdssid=${props.sdssid}&files=${props.files.join()}`)
 console.log('url', url)
 
 async function check_solara() {
@@ -49,4 +49,3 @@ onMounted(() => {
 })
 
 </script>
-

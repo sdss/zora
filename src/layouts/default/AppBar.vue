@@ -22,6 +22,11 @@
           :prepend-icon="item.icon">
           <RouterLink :to="item.site">{{item.text}}</RouterLink>
         </v-btn>
+
+        <!-- Conditionally render DataView button -->
+        <v-btn v-if="showdataviz" :prepend-icon="dataviewlink.icon">
+          <RouterLink :to="dataviewlink.site">{{dataviewlink.text}}</RouterLink>
+        </v-btn>
       </v-col>
 
       <v-spacer></v-spacer>
@@ -62,6 +67,14 @@
         <v-list-item-title><RouterLink :to="item.site">{{ item.text }}</RouterLink></v-list-item-title>
       </v-list-item>
 
+      <!-- Conditionally render DataView link -->
+      <v-list-item v-if="showdataviz" link>
+        <template v-slot:prepend>
+          <v-icon :icon="dataviewlink.icon" size="small"></v-icon>
+        </template>
+        <v-list-item-title><RouterLink :to="dataviewlink.site">{{ dataviewlink.text }}</RouterLink></v-list-item-title>
+      </v-list-item>
+
       <!-- release select -->
       <v-list-item>
         <release-select />
@@ -72,12 +85,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { RouterLink } from "vue-router"
 import ReleaseSelect from '@/components/ReleaseSelect.vue'
 import LoginForm from '@/components/LoginForm.vue'
 import { useTheme } from 'vuetify'
+import { useAppStore } from '@/store/app'
 
+const store = useAppStore()
 const drawer = ref(false);
 const theme = useTheme()
 
@@ -85,8 +100,14 @@ const links = [
         { text: 'Home', icon: 'mdi-home', site: '/' },
         { text: 'About', icon: 'mdi-help', site: '/about' },
         { text: 'Search', icon: 'mdi-magnify', site: '/search' },
+        // { text: 'DataView', icon: 'mdi-chart-scatter-plot', site: '/test'}
       ]
 
+// Local state variable for showing the DataView button
+const showdataviz = computed(() => { return store.release === 'IPL3'})
+const dataviewlink = { text: 'DataView', icon: 'mdi-chart-scatter-plot', site: '/dataview' }
+
+// function to toggle the dark/light theme
 function toggleTheme () {
   theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
 }
