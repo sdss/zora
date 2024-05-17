@@ -35,6 +35,11 @@ const routes = [
         component: () => import(/* webpackChunkName: "results" */ '@/views/Target.vue')
       },
       {
+        path: '/explore',
+        name: 'explore',
+        component: () => import(/* webpackChunkName: "results" */ '@/views/Explore.vue')
+      },
+      {
         path: '/dataview',
         name: 'dataview',
         component: () => import(/* webpackChunkName: "results" */ '@/views/DataView.vue')

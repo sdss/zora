@@ -100,7 +100,7 @@ const links = [
         { text: 'Home', icon: 'mdi-home', site: '/' },
         { text: 'About', icon: 'mdi-help', site: '/about' },
         { text: 'Search', icon: 'mdi-magnify', site: '/search' },
-        // { text: 'DataView', icon: 'mdi-chart-scatter-plot', site: '/test'}
+        { text: 'Explore', icon: 'mdi-binoculars', site: '/explore'}
       ]
 
 // Local state variable for showing the DataView button
