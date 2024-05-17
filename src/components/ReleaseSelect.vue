@@ -38,15 +38,22 @@ let required = [
                 ]
 
 async function get_releases() {
+    if (Object.keys(store.all_releases).length !== 0) {
+          console.log('releases already stored')
+          return
+      }
+
     // function to get the data release from Valis
     // using public = false and a hard-coded public release to get all releases
     await axios.get(import.meta.env.VITE_API_URL + '/envs/releases?public=False&release=DR17')
         .then((response) => {
             console.log('resp data', response.data)
             // remove the MPLs
-            let rels = response.data.filter((rel: string) => !rel.startsWith("M")).reverse()
+            let rels = response.data.filter((rel: string) => !rel.startsWith("M") && !rel.startsWith("W")).reverse()
             // remove the older DRs for now; update this to only DR19 once it's available
             rels = rels.filter((rel: string) => rel.startsWith("DR") ? parseInt(rel.slice(2)) >= 18 : rel)
+            // write code to filter out all IPL except IPL3 from rels
+            rels = rels.filter((rel: string) => rel.startsWith("IPL") ? rel.endsWith("3") : rel)
             // store the releases and check for selection
             store.all_releases = rels
             store.check_release()
