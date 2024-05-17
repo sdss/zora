@@ -27,7 +27,7 @@ console.log('url', url)
 
 async function check_solara() {
 
-    await axios.get(import.meta.env.VITE_API_URL + '/solara', {withCredentials: true})
+    await axios.get(import.meta.env.VITE_API_URL + '/solara/embed/', {withCredentials: true})
         .then((response) => {
             console.log('solara response', response)
             valid.value = true

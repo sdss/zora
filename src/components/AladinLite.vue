@@ -23,7 +23,7 @@ A.init.then(() => {
     cooFrame: 'ICRSd', showCooGridControl: true, showSimbadPointerControl: true, showCooGrid: false,
     showProjectionControl: false, showFullscreenControl: false, showZoomControl: false});
 
-    aladin.setFovRange(0.01, 10)
+    aladin.setFoVRange(0.01, 1)
 });
 </script>
 
