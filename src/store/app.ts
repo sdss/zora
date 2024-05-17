@@ -75,5 +75,20 @@ export const useAppStore = defineStore('app', {
       return this.logged_in || (!this.logged_in && this.release.startsWith("DR"))
     }
 
-  }
+  },
+  persist: {
+    enabled: true,
+    strategies: [
+      {
+        key: 'app-release',
+        storage: sessionStorage,
+        paths: ['release', 'all_releases'],
+      },
+      {
+        key: 'app-user',
+        storage: sessionStorage,
+        paths: ['user', 'auth', 'logged_in'],
+      }
+    ],
+  },
 })

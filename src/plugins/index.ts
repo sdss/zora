@@ -10,6 +10,10 @@ import vuetify from './vuetify'
 import pinia from '../store'
 import router from '../router'
 
+// Persisted State
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+pinia.use(piniaPluginPersistedstate)
+
 // Types
 import type { App } from 'vue'
 
