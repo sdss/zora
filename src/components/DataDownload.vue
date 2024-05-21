@@ -33,9 +33,9 @@
         </v-card>
       </v-dialog>
     </v-menu>
-  </template>
+</template>
 
-  <script setup lang="ts">
+<script setup lang="ts">
   import { ref, defineProps, watch } from 'vue';
   import { useAppStore } from '@/store/app'
 
@@ -52,14 +52,11 @@ const props = defineProps<{
   let copied = ref(false)
 
   // data to populate the dropdown menu with
-  let dloptions = [
-    {key: 'http', title: 'With wget', value: 'http',
-    dialog: 'Download via Http', code: generateCode('http')},
-    {key: 'rsync', title: 'With rsync', value: 'rsync',
-    dialog: 'Download using Rsync', code: generateCode('rsync')},
-    {key: 'python', title: 'With Python', value: 'python',
-    dialog: "Download with sdss_access", code: generateCode('python')}
-  ]
+let dloptions = [
+  { key: 'http', title: 'With wget', value: 'http', dialog: 'Download via Http', code: '' },
+  { key: 'rsync', title: 'With rsync', value: 'rsync', dialog: 'Download using Rsync', code: '' },
+  { key: 'python', title: 'With Python', value: 'python', dialog: "Download with sdss_access", code: '' }
+]
 
 function showDialog(title: string, code: string) {
     // show the dialog window
@@ -92,8 +89,7 @@ function convertPath(path: string, key: string) {
 function generateCode(key: string) {
     // generate the code snippets for the download menu options
     let urls = props.files.map(x => convertPath(x, key))
-    urls.push(urls[0])
-    console.log('urls', urls)
+
     let code = ''
     switch (key) {
       case 'http':
