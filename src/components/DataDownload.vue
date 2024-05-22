@@ -89,7 +89,7 @@ function convertPath(path: string, key: string) {
 function generateCode(key: string) {
     // generate the code snippets for the download menu options
     let urls = props.files.map(x => convertPath(x, key))
-
+    console.log('urls', urls)
     let code = ''
     switch (key) {
       case 'http':
@@ -114,7 +114,8 @@ function generateCode(key: string) {
 }
 
 
-watch(() => props.files, () => {
+watch(() => props.files, (newf, oldf) => {
+  console.log('files changed from', oldf, 'to', newf);
   // Regenerate download options whenever the files prop changes
   dloptions.forEach(option => {
     option.code = generateCode(option.key);
