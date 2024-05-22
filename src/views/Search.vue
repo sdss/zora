@@ -1,9 +1,14 @@
 <template>
     <v-form fast-fail @submit.prevent ref="form" validate-on="input">
       <v-container>
+        <v-row class="mt-1">
+          <v-col>
+            <CoordResolverInput />
+          </v-col>
+        </v-row>
         <v-row>
           <!-- width of all columns in a row should add up to 12 ;  see Vuetify Grid -->
-          <v-col md=6>
+          <v-col cols="12" md=6>
             <!-- use of the TextInput component -->
             <!-- search coordinate field -->
             <text-input
@@ -12,10 +17,11 @@
               placeholder="315.014, 35.299"
               hint="Enter a RA, Dec coordinate in [decimal or hmsdms] format"
               :rules="coordRules"
+              density="default"
               id="coords"
             />
           </v-col>
-          <v-col md=4>
+          <v-col cols="12" md=3>
             <!-- search radius field -->
             <text-input
                 v-model="formData.radius"
@@ -23,21 +29,23 @@
                 placeholder="0.01"
                 hint="Enter a search radius"
                 :rules="radiusRules"
+                density="default"
                 id="radius"
             />
           </v-col>
-          <v-col md=2>
+          <v-col cols="12" md=3>
             <!-- radius dropdown select -->
             <v-select
                 v-model="formData.units"
                 label="Unit"
                 id="unit"
                 :items="['degree', 'arcmin', 'arcsec']"
+                density="default"
             ></v-select>
           </v-col>
         </v-row>
         <v-row>
-            <v-col cols="4" md="4">
+          <v-col cols="12" md="6">
             <!-- search id field -->
             <text-input
               v-model="formData.id"
@@ -46,13 +54,32 @@
               hint="Enter an SDSS identifier"
               :rules="idRules"
               id="id"
+              density="default"
             />
           </v-col>
-          <v-col cols="4" md="4">
-            <dropdown-select label="Programs" id="programs" :items="store.programs" v-model="formData.program"/>
+          <v-col cols="12" md="6">
+            <v-file-input
+              v-model="formData.fileTargets"
+              show-size
+              label="Upload a list of targets"
+              density="default"
+              variant="outlined">
+            </v-file-input>
           </v-col>
-          <v-col cols="4" md="4">
-            <dropdown-select label="Cartons" id="cartons" :items="store.cartons" v-model="formData.carton"/>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <dropdown-select label="Programs" id="programs" density="default" :items="store.programs" v-model="formData.program"/>
+          </v-col>
+          <v-col cols="12" md="3">
+            <dropdown-select label="Cartons" id="cartons" density="default" :items="store.cartons" v-model="formData.carton"/>
+          </v-col>
+          <v-col cols="12" md="3">
+            <v-btn-toggle multiple divided mandatory rounded="5" density="default" v-model="formData.mapper">
+              <v-btn value="bhm">BHM</v-btn>
+              <v-btn value="mwm">MWM</v-btn>
+              <v-btn value="lwm">LWM</v-btn>
+            </v-btn-toggle>
           </v-col>
         </v-row>
 
@@ -84,11 +111,14 @@ import axios from 'axios'
 import { ref, onMounted, watch } from 'vue'
 import TextInput from '@/components/TextInput.vue'
 import DropdownSelect from '@/components/DropdownSelect.vue';
+import CoordResolverInput from '@/components/CoordResolverInput.vue';
 import { useRouter } from 'vue-router';
-import { useAppStore } from '@/store/app'
+import { useAppStore, useSearchStore } from '@/store/app'
+import { storeToRefs } from 'pinia'
 
 // get the application state store and router
 const store = useAppStore()
+const searchStore = useSearchStore()
 const router = useRouter()
 
 // set up a form reference, is the name in v-form ref="form"
@@ -124,12 +154,14 @@ let initFormData = {
   coords: '',
   ra: '',
   dec: '',
-  radius: '',
+  radius: '0.01',
   id: '',
   units: 'degree',
   release: store.release,
   carton: '',
-  program: ''
+  program: '',
+  mapper: ['bhm', 'mwm', 'lwm'],
+  fileTargets: [],
 }
 // create dynamic bindings to form fields
 let formData = ref({ ...initFormData })
@@ -145,6 +177,13 @@ watch(formData, async () => {
   valid.value = formValid.valid; // update the valid state
 }, { deep: true }); // deep watch to track nested property changes
 
+// watcher to update coordinate input if name has been successfully resolved to coordinates
+const { resolverCoords } = storeToRefs(searchStore)
+watch(resolverCoords, () => {
+  if (resolverCoords.value) {
+    formData.value.coords = `${resolverCoords.value.ra}, ${resolverCoords.value.dec}`
+  } 
+})
 
 // events
 async function submit_form(this: any) {
