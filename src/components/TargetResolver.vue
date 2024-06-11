@@ -15,7 +15,7 @@
                 >
                 <!-- make the main id a simbad anchor -->
                 <template v-slot:item.main_id="{ value }">
-                    <a :href="`https://simbad.u-strasbg.fr/simbad/sim-id?Ident=${value}&submit=submit+id`" target="_blank">{{ value }}</a>
+                    <a :href="`https://simbad.u-strasbg.fr/simbad/sim-id?Ident=${encodeURIComponent(value)}&submit=submit+id`" target="_blank">{{ value }}</a>
                 </template>
                 </v-data-table>
             </v-card-text>
