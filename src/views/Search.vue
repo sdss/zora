@@ -85,7 +85,7 @@ import TextInput from '@/components/TextInput.vue'
 import DropdownSelect from '@/components/DropdownSelect.vue';
 import { useRouter } from 'vue-router';
 import { useAppStore } from '@/store/app'
-import { apiInstance } from '@/api'
+import axiosInstance from '@/axios'
 
 // get the application state store and router
 const store = useAppStore()
@@ -164,7 +164,7 @@ async function submit_form(this: any) {
     [formData.value.ra, formData.value.dec] = formData.value.coords ? formData.value.coords.split(',') : ["", ""]
     console.log('submitting', formData.value)
 
-    await apiInstance.post('/query/main',
+    await axiosInstance.post('/query/main',
         formData.value, {headers: {'Content-Type': 'application/json'}})
         .then((response) => {
           // handle the initial response
@@ -235,9 +235,9 @@ onMounted(() => {
 
   // set up API call endpoints
     let endpoints = [
-        import.meta.env.VITE_API_URL + `/query/list/cartons`,
-        import.meta.env.VITE_API_URL + `/query/list/programs`,
-        import.meta.env.VITE_API_URL + `/query/list/program-map`
+        `/query/list/cartons`,
+        `/query/list/programs`,
+        `/query/list/program-map`
         ]
 
     // check if the store already has data saved
@@ -247,7 +247,7 @@ onMounted(() => {
     }
 
     // await the promises and cache the results in the store
-    Promise.all(endpoints.map((endpoint) => apiInstance.get(endpoint)))
+    Promise.all(endpoints.map((endpoint) => axiosInstance.get(endpoint)))
     .then(([{data: carts}, {data: progs}, {data: progmap}] )=> {
       console.log({ carts, progs, progmap })
       store.store_cartons(carts, progs, progmap)

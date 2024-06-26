@@ -105,7 +105,7 @@ import AladinLite from '@/components/AladinLite.vue'
 import TargetResolver from '@/components/TargetResolver.vue'
 import DataDownload from '@/components/DataDownload.vue'
 
-import { apiInstance } from '@/api'
+import axiosInstance from '@/axios'
 
 // get the application state store and router
 const store = useAppStore()
@@ -165,14 +165,14 @@ async function get_target_info() {
 
     // set up API call endpoints
     let endpoints = [
-        import.meta.env.VITE_API_URL + `/target/ids/${sdss_id}?release=${rel}`,
-        import.meta.env.VITE_API_URL + `/target/cartons/${sdss_id}?release=${rel}`,
-        import.meta.env.VITE_API_URL + `/target/catalogs/${sdss_id}?release=${rel}`,
-        import.meta.env.VITE_API_URL + `/target/pipelines/${sdss_id}?release=${rel}`
+        `/target/ids/${sdss_id}?release=${rel}`,
+        `/target/cartons/${sdss_id}?release=${rel}`,
+        `/target/catalogs/${sdss_id}?release=${rel}`,
+        `/target/pipelines/${sdss_id}?release=${rel}`
         ]
 
     // await the promises
-    await Promise.all(endpoints.map((endpoint) => apiInstance.get(endpoint)))
+    await Promise.all(endpoints.map((endpoint) => axiosInstance.get(endpoint)))
     .then(([{data: target}, {data: cartons}, {data: catalogs}, {data: pipes}] )=> {
       console.log({ target, cartons, catalogs, pipes })
       loading.value = false
@@ -210,7 +210,7 @@ async function get_db_info() {
         return
     }
 
-    await apiInstance.get(import.meta.env.VITE_API_URL + '/info/database')
+    await axiosInstance.get('/info/database')
         .then((response) => {
             console.log('db info', response.data)
             // store the db metadata

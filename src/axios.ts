@@ -2,7 +2,7 @@ import axios from 'axios'
 import JSONbig from 'json-big'
 
 // Defines the API instance in Axios with special handling for big integers.
-export const apiInstance = axios.create({
+const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   timeout: 5000,
   transformResponse: [
@@ -20,3 +20,5 @@ export const apiInstance = axios.create({
     }
   ]
 })
+
+export default axiosInstance
