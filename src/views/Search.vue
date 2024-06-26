@@ -86,10 +86,12 @@ import TextInput from '@/components/TextInput.vue'
 import DropdownSelect from '@/components/DropdownSelect.vue';
 import { useRouter } from 'vue-router';
 import { useAppStore } from '@/store/app'
+import JSONbigint from 'json-bigint'
 
 // get the application state store and router
 const store = useAppStore()
 const router = useRouter()
+
 
 // set up a form reference, is the name in v-form ref="form"
 let form = ref(null);
@@ -164,23 +166,29 @@ async function submit_form(this: any) {
     console.log('submitting', formData.value)
 
     // submit the POST request to Valis
+    axios.interceptors.request.use((request) => {
+      request.transformResponse = [data => data]
+      return request
+    })
+
     await axios.post(import.meta.env.VITE_API_URL + '/query/main',
         formData.value,
         {headers: {'Content-Type': 'application/json'}})
         .then((response) => {
           // handle the initial response
-            console.log(response.data)
+            const data = JSONbigint.parse(response.data);
+            console.log(data)
 
             // check for good status in response
-            if (response.data['status'] != 'success') {
-              let msg = `Response status failed: ${response.data['msg']}`
+            if (data['status'] != 'success') {
+              let msg = `Response status failed: ${data['msg']}`
               set_fail(msg)
               throw new Error(msg)
             }
 
             // return the actual data
             fail.value = false
-            return response.data['data']
+            return data['data']
         })
         .then((data) => {
           // handle the actual data results
@@ -277,4 +285,3 @@ onMounted(() => {
 // }, { immediate: true, deep: true })
 
 </script>
-
