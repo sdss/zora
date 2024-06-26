@@ -80,13 +80,12 @@
 
 <script setup lang="ts">
 
-import axios from 'axios'
 import { ref, onMounted, watch } from 'vue'
 import TextInput from '@/components/TextInput.vue'
 import DropdownSelect from '@/components/DropdownSelect.vue';
 import { useRouter } from 'vue-router';
 import { useAppStore } from '@/store/app'
-import JSONbigint from 'json-bigint'
+import { apiInstance } from '@/api'
 
 // get the application state store and router
 const store = useAppStore()
@@ -165,30 +164,22 @@ async function submit_form(this: any) {
     [formData.value.ra, formData.value.dec] = formData.value.coords ? formData.value.coords.split(',') : ["", ""]
     console.log('submitting', formData.value)
 
-    // submit the POST request to Valis
-    axios.interceptors.request.use((request) => {
-      request.transformResponse = [data => data]
-      return request
-    })
-
-    await axios.post(import.meta.env.VITE_API_URL + '/query/main',
-        formData.value,
-        {headers: {'Content-Type': 'application/json'}})
+    await apiInstance.post('/query/main',
+        formData.value, {headers: {'Content-Type': 'application/json'}})
         .then((response) => {
           // handle the initial response
-            const data = JSONbigint.parse(response.data);
-            console.log(data)
+            console.log(response)
 
             // check for good status in response
-            if (data['status'] != 'success') {
-              let msg = `Response status failed: ${data['msg']}`
+            if (response.data['status'] != 'success') {
+              let msg = `Response status failed: ${response.data['msg']}`
               set_fail(msg)
               throw new Error(msg)
             }
 
             // return the actual data
             fail.value = false
-            return data['data']
+            return response.data['data']
         })
         .then((data) => {
           // handle the actual data results
@@ -256,7 +247,7 @@ onMounted(() => {
     }
 
     // await the promises and cache the results in the store
-    Promise.all(endpoints.map((endpoint) => axios.get(endpoint)))
+    Promise.all(endpoints.map((endpoint) => apiInstance.get(endpoint)))
     .then(([{data: carts}, {data: progs}, {data: progmap}] )=> {
       console.log({ carts, progs, progmap })
       store.store_cartons(carts, progs, progmap)

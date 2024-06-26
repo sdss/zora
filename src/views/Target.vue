@@ -96,16 +96,16 @@
 
 <script setup lang="ts">
 
-import axios from 'axios'
 import { useAppStore } from '@/store/app'
 import { useRoute } from 'vue-router'
 import { ref, onMounted } from 'vue'
-import JSONbig from 'json-big'
 
 import Solara from '@/components/Solara.vue'
 import AladinLite from '@/components/AladinLite.vue'
 import TargetResolver from '@/components/TargetResolver.vue'
 import DataDownload from '@/components/DataDownload.vue'
+
+import { apiInstance } from '@/api'
 
 // get the application state store and router
 const store = useAppStore()
@@ -171,23 +171,8 @@ async function get_target_info() {
         import.meta.env.VITE_API_URL + `/target/pipelines/${sdss_id}?release=${rel}`
         ]
 
-    // axios config
-    // see https://axios-http.com/docs/req_config
-    const config = {
-        transformResponse: [function transform(data) {
-            // Replacing the default transformResponse in axios because this uses JSON.parse and causes problems
-            // with precision of big numbers.
-            if (typeof data === 'string') {
-                try {
-                    data = JSONbig.parse(data);
-                } catch (e) { /* Ignore */ }
-            }
-            return data
-        }],
-    }
-
     // await the promises
-    await Promise.all(endpoints.map((endpoint) => axios.get(endpoint, config)))
+    await Promise.all(endpoints.map((endpoint) => apiInstance.get(endpoint)))
     .then(([{data: target}, {data: cartons}, {data: catalogs}, {data: pipes}] )=> {
       console.log({ target, cartons, catalogs, pipes })
       loading.value = false
@@ -225,7 +210,7 @@ async function get_db_info() {
         return
     }
 
-    await axios.get(import.meta.env.VITE_API_URL + '/info/database')
+    await apiInstance.get(import.meta.env.VITE_API_URL + '/info/database')
         .then((response) => {
             console.log('db info', response.data)
             // store the db metadata
