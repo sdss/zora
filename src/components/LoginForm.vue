@@ -37,9 +37,9 @@
 
 <script lang="ts" setup>
 
-import { ref } from 'vue'
-import { useAppStore } from '@/store/app'
-import axios from 'axios'
+import axiosInstance from '@/axios';
+import { useAppStore } from '@/store/app';
+import { ref } from 'vue';
 
 // get the application state store
 const store = useAppStore()
@@ -67,7 +67,7 @@ async function login() {
     // login via the valis API
     console.log('logging in now')
 
-    await axios.post(import.meta.env.VITE_API_URL + '/auth/login',
+    await axiosInstance.post(import.meta.env.VITE_API_URL + '/auth/login',
         {"username": user.value, "password": password.value},
         {headers: {'Content-Type': 'multipart/form-data'}})
         .then((response) => {
@@ -84,7 +84,7 @@ async function login() {
 
 async function get_user() {
     // get the user member info
-    await axios.post(import.meta.env.VITE_API_URL + '/auth/user', {}, {headers: store.get_auth_hdr()})
+    await axiosInstance.post(import.meta.env.VITE_API_URL + '/auth/user', {}, {headers: store.get_auth_hdr()})
         .then((response) => {
             // store the user info
             store.user = response.data

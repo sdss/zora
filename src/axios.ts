@@ -5,6 +5,7 @@ import JSONbig from 'json-big'
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   timeout: 5000,
+  withCredentials: true,
   transformResponse: [
     function transform(data) {
       // Replacing the default transformResponse in axios because this uses JSON.parse and causes problems

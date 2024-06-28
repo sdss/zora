@@ -28,8 +28,8 @@
 
 <script lang="ts" setup>
 
-import { ref, defineProps, watch} from 'vue'
-import axios from 'axios'
+import axiosInstance from '@/axios';
+import { defineProps, ref, watch } from 'vue';
 
 // define which properties are passed in from the parent, i.e. ":xxx"
 const props = defineProps<{
@@ -54,7 +54,7 @@ async function fetchResolutionResults() {
     // resolve the target coordinates using the valis endpoint
     const url = import.meta.env.VITE_API_URL + `/target/resolve/coord?coord=${props.ra}&coord=${props.dec}&cunit=deg&radius=3&runit=arcmin`;
 
-    await axios.get(url)
+    await axiosInstance.get(url)
     .then((response) => {
         results.value = response.data
     })
