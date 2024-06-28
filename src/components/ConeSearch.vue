@@ -26,10 +26,10 @@
 
 <script lang="ts" setup>
 
-import { ref, Ref } from 'vue'
-import axios from 'axios'
-import { useRouter } from 'vue-router'
-import { useAppStore } from '@/store/app'
+import axiosInstance from '@/axios';
+import { useAppStore } from '@/store/app';
+import { ref, Ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 // get the application state store and router
 const store = useAppStore()
@@ -82,7 +82,7 @@ function parseInput(input: string): [string, string, { radius: number, units: st
 
 async function callApi(ra: string, dec: string, { radius, units }: { radius: number, units: string }): Promise<void> {
     const endpoint = import.meta.env.VITE_API_URL + `/query/cone?ra=${ra}&dec=${dec}&radius=${radius}&units=${units}`
-    await axios.get(endpoint)
+    await axiosInstance.get(endpoint)
         .then(response => {
         // Handle the response data
 

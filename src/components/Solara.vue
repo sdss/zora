@@ -7,8 +7,8 @@
 
 <script lang="ts" setup>
 
-import axios from 'axios'
-import { ref, onMounted } from 'vue'
+import axiosInstance from '@/axios';
+import { onMounted, ref } from 'vue';
 
 
 // define which properties are passed in from the parent, i.e. ":xxx"
@@ -27,7 +27,7 @@ console.log('url', url)
 
 async function check_solara() {
 
-    await axios.get(import.meta.env.VITE_API_URL + '/solara/embed/', {withCredentials: true})
+    await axiosInstance.get(import.meta.env.VITE_API_URL + '/solara/embed/', {withCredentials: true})
         .then((response) => {
             console.log('solara response', response)
             valid.value = true
