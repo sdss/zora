@@ -86,10 +86,14 @@ import TextInput from '@/components/TextInput.vue'
 import DropdownSelect from '@/components/DropdownSelect.vue';
 import { useRouter } from 'vue-router';
 import { useAppStore } from '@/store/app'
+import useStoredTheme from '@/composables/useTheme'
 
 // get the application state store and router
 const store = useAppStore()
 const router = useRouter()
+
+// mount the stored theme
+useStoredTheme()
 
 // set up a form reference, is the name in v-form ref="form"
 let form = ref(null);
@@ -277,4 +281,3 @@ onMounted(() => {
 // }, { immediate: true, deep: true })
 
 </script>
-

@@ -41,7 +41,7 @@
       </v-col>
 
       <!-- toggle theme -->
-      <!-- <v-btn @click="toggleTheme"><v-icon icon="mdi-theme-light-dark"/></v-btn> -->
+      <v-btn @click="toggleTheme" v-tippy="'Toggle Theme'"><v-icon icon="mdi-theme-light-dark"/></v-btn>
     </v-row>
   </v-app-bar>
 
@@ -110,6 +110,7 @@ const dataviewlink = { text: 'DataView', icon: 'mdi-chart-scatter-plot', site: '
 // function to toggle the dark/light theme
 function toggleTheme () {
   theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
+  store.theme = theme.global.name.value
 }
 
 const closeDrawerOnResize = () => {

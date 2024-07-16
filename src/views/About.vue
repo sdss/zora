@@ -57,6 +57,10 @@
 
 import { ref, watch, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
+import useStoredTheme from '@/composables/useTheme'
+
+// mount the stored theme
+useStoredTheme()
 
 const theme = useTheme()
 

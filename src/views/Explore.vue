@@ -4,6 +4,10 @@
 
 <script lang="ts" setup>
 import A from 'aladin-lite'
+import useStoredTheme from '@/composables/useTheme'
+
+// mount the stored theme
+useStoredTheme()
 
 let aladin = null
 
@@ -11,6 +15,58 @@ A.init.then(() => {
     aladin = A.aladin('#explore-aladin-lite', {target: 'M101', fov: 5, projection: "AIT",
     survey: "P/PanSTARRS/DR1/color-z-zg-g", cooFrame: 'ICRSd', showCooGridControl: true,
     showSimbadPointerControl: true, showCooGrid: true, showContextMenu: true});
+
+    let btn = A.button({
+                content: 'My button',
+                classList: ['myButton'],
+                tooltip: {cssStyle: {color: 'red'}, content: 'Create a moc in pink!', position: {direction: 'top'}},
+                action(o) {
+                    aladin.select('poly', p => {
+                        try {
+                            let ra = []
+                            let dec = []
+                            for (const v of p.vertices) {
+                                let [lon, lat] = aladin.pix2world(v.x, v.y);
+                                ra.push(lon)
+                                dec.push(lat)
+                            }
+                            let moc = A.MOCFromPolygon(
+                                {ra, dec},
+                                {name: 'poly', lineWidth: 3.0, color: 'pink'},
+                            );
+                            aladin.addMOC(moc)
+                        } catch(_) {
+                            alert('Selection covers a region out of the projection definition domain.');
+                        }
+                    })
+                }
+            });
+
+    let bbtn = A.button({
+        content: 'Test',
+        classList: ['testbutton'],
+        action(o) {
+            aladin.select('circle', p => {
+                let [lon, lat] = aladin.pix2world(p.x, p.y);
+                console.log(p, lon, lat);
+                var s = aladin.getSize();
+  	            var f = aladin.getFov();
+                console.log(s, f);
+                var c1 = f[0]/s[0];
+                var c2 = f[1]/s[1];
+  	            console.log('pixel scale [deg/pix]', c1, c2);
+                console.log(lon, lat, c1 * p.r)
+
+                var overlay = A.graphicOverlay({color: '#ee2345', lineWidth: 2});
+                aladin.addOverlay(overlay);
+                overlay.add(A.circle(lon, lat, c1 * p.r));
+            })
+        }
+
+    })
+
+    aladin.addUI(btn)
+    aladin.addUI(bbtn)
 });
 </script>
 
