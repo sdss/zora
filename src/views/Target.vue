@@ -104,12 +104,16 @@ import Solara from '@/components/Solara.vue'
 import AladinLite from '@/components/AladinLite.vue'
 import TargetResolver from '@/components/TargetResolver.vue'
 import DataDownload from '@/components/DataDownload.vue'
+import useStoredTheme from '@/composables/useTheme'
 
 import axiosInstance from '@/axios'
 
 // get the application state store and router
 const store = useAppStore()
 const route = useRoute()
+
+// mount the stored theme
+useStoredTheme()
 
 const sdss_id = route.params.sdss_id
 const missingId = !sdss_id

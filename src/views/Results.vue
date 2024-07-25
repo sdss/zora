@@ -100,6 +100,10 @@
 <script setup lang="ts">
 import { useAppStore } from '@/store/app'
 import { ref, onMounted } from 'vue'
+import useStoredTheme from '@/composables/useTheme'
+
+// mount the stored theme
+useStoredTheme()
 
 // get the application state store and router
 const store = useAppStore()

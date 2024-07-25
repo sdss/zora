@@ -55,6 +55,10 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ConeSearch from '@/components/ConeSearch.vue'
+import useStoredTheme from '@/composables/useTheme'
+
+// mount the stored theme
+useStoredTheme()
 
 const router = useRouter();
 const targetId = ref('');

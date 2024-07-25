@@ -13,7 +13,8 @@ export const useAppStore = defineStore('app', {
     programs: [],
     program_map: {},
     carton_map: {},
-    db_info: {}
+    db_info: {},
+    theme: '',
   }),
   actions: {
     get_releases() {
@@ -88,6 +89,11 @@ export const useAppStore = defineStore('app', {
         key: 'app-user',
         storage: sessionStorage,
         paths: ['user', 'auth', 'logged_in'],
+      },
+      {
+        key: 'app-theme',
+        storage: sessionStorage,
+        paths: ['theme']
       }
     ],
   },
