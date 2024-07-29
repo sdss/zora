@@ -17,14 +17,14 @@
       </v-col>
 
       <!-- page links -->
-      <v-col class="d-none d-sm-flex">
-        <v-btn v-for="(item, i) in links" :key="i" :value="item"
+      <v-col class="d-none d-sm-flex" id="pagelinks">
+        <v-btn v-for="(item, i) in links" :key="i" :value="item" v-tippy="item.tippy"
           :prepend-icon="item.icon">
           <RouterLink :to="item.site">{{item.text}}</RouterLink>
         </v-btn>
 
         <!-- Conditionally render DataView button -->
-        <v-btn v-if="showdataviz" :prepend-icon="dataviewlink.icon">
+        <v-btn v-if="showdataviz" :prepend-icon="dataviewlink.icon" v-tippy="dataviewlink.tippy">
           <RouterLink :to="dataviewlink.site">{{dataviewlink.text}}</RouterLink>
         </v-btn>
       </v-col>
@@ -97,15 +97,15 @@ const drawer = ref(false);
 const theme = useTheme()
 
 const links = [
-        { text: 'Home', icon: 'mdi-home', site: '/' },
-        { text: 'About', icon: 'mdi-help', site: '/about' },
-        { text: 'Search', icon: 'mdi-magnify', site: '/search' },
-        { text: 'Explore', icon: 'mdi-binoculars', site: '/explore'}
+        { text: 'Home', icon: 'mdi-home', site: '/', tippy: 'Home - quick access to features' },
+        { text: 'About', icon: 'mdi-help', site: '/about', tippy: 'Learn more about Zora' },
+        { text: 'Search', icon: 'mdi-magnify', site: '/search', tippy: 'Search for SDSS targets' },
+        { text: 'Explore', icon: 'mdi-binoculars', site: '/explore', tippy: 'Explore SDSS on the sky'}
       ]
 
 // Local state variable for showing the DataView button
 const showdataviz = computed(() => { return store.release === 'IPL3'})
-const dataviewlink = { text: 'DataView', icon: 'mdi-chart-scatter-plot', site: '/dataview' }
+const dataviewlink = { text: 'DataView', icon: 'mdi-chart-scatter-plot', site: '/dataview', tippy: 'Explore SDSS output parameters' }
 
 // function to toggle the dark/light theme
 function toggleTheme () {

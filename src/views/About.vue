@@ -11,15 +11,61 @@
       <!-- How to Use Section -->
       <v-row>
         <v-col cols="12">
-            <v-expansion-panels>
+            <v-expansion-panels :value="0">
             <v-expansion-panel
                 title="Getting Started"
                 text="Basic instructions on getting started with the website.">
-            </v-expansion-panel>
+                <template v-slot:text>
+                  <v-card flat>
+                    <v-card-text>
+                      <p class="mb-4">This guide will help you get started with the main features and functionalities.</p>
+
+                      <h3 class="text-h6 mb-2">Key Features</h3>
+                      <ul class="mb-4">
+                        <li>Home: Quick access to sky cone search and specific SDSS target id searches</li>
+                        <li>Search: A more advanced form search of targets in SDSS-V.</li>
+                        <li>Investigate a Target: See detailed target information and explore its spectra with Jdaviz, a quicklook visualization and analysis tool</li>
+                        <li>Sky Explorer: Explore SDSS targets on the sky using Aladin-Lite, and overlay with other surveys</li>
+                        <li>Parameter Exploration: Drill down into SDSS output pipeline parameters with the DataView dashboard</li>
+                      </ul>
+
+                      <p class="mb-4">Many elements will display contextual information upon hovering to
+                        help guide you. Additionally, wherever you see the <v-icon size="x-small">mdi-help</v-icon> icon, hover over it to display extra help.</p>
+
+                    </v-card-text>
+                  </v-card>
+                </template>
+              </v-expansion-panel>
 
             <v-expansion-panel
                 title="Navigating the Data"
                 text="Guidelines on how to navigate and access data.">
+                <template v-slot:text>
+                  <v-card flat>
+                    <v-card-text>
+                      <h3 class="text-h6 mb-2">Selecting a Data Release</h3>
+                      <p class="mb-4">Use the Data Release dropdown in the appbar (top right) to select a public SDSS data release.
+                        To select an internal public launch (IPL) for proprietary data, you must first login with your SDSS user credentials.</p>
+
+                      <h3 class="text-h6 mb-2">Downloading Data</h3>
+                      <p class="mb-4">You can download individual spectra for SDSS targets using the Download Data dropdown from a target page.
+                        Download options are available for wget, rsync, and sdss_access.  For bulk data downloads, use sdss_access directly.</p>
+
+                      <h3 class="text-h6 mb-2">Search for data</h3>
+                      <p class="mb-4">Use the advanced search form page to look for data.  From there,
+                        download the table of results, or click on each target for detailed investigation.</p>
+
+                      <h3 class="text-h6 mb-2">Visualizing Data</h3>
+                      <p class="mb-4">To explore and visualize data, you can</p>
+                      <ul>
+                        <li>Perform spectral quicklook and analysis with Jdaviz from the target page</li>
+                        <li>Investigate SDSS pipeline parameters, on the whole dataset, from the DataView page</li>
+                        <li>Explore SDSS targets on sky, along with other surveys, from the Sky Explorer page</li>
+                      </ul>
+
+                    </v-card-text>
+                  </v-card>
+                </template>
             </v-expansion-panel>
 
             <!-- Add more panels as needed -->
@@ -72,14 +118,29 @@ const resources = ref([
   },
   {
     title: 'Python Package Documentation',
-    description: 'The POC sdss-brain package provides pythonic access to SDSS-V data products',
+    description: 'The proof-of-concept sdss-brain package provides pythonic access to SDSS-V data products',
     link: 'https://sdss-brain.readthedocs.io/en/latest/'
   },
   {
     title: 'Valis Documentation',
-    description: 'The FastAPI backend that powers this site.',
+    description: 'The FastAPI backend that powers this site. Use Valis for programmatic access to SDSS data.',
     link: import.meta.env.VITE_API_URL + '/docs'
   },
+  {
+    title: 'SDSS Website',
+    description: 'The official SDSS public home',
+    link: 'https://sdss.org/'
+  },
+  {
+    title: 'SDSS SkyServer',
+    description: 'Access SDSS catalog data through web services',
+    link: 'https://skyserver.sdss.org/'
+  },
+  {
+    title: 'SciServer',
+    description: 'Access SDSS data in the SciServer science platform',
+    link: 'https://www.sciserver.org/'
+  }
   // Add more resources as needed
 ])
 
