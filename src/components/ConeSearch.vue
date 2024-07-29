@@ -19,7 +19,9 @@
         <v-btn
         :color="isValid ? 'primary' : 'red'"
         :disabled="!isValid"
-        @click="onSearch">Go</v-btn>
+        @click="onSearch">Go
+        <progress-circle :loading="loading"></progress-circle>
+        </v-btn>
       </template>
     </v-text-field>
 </template>
@@ -30,6 +32,7 @@ import { ref, Ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/store/app'
+import ProgressCircle from '@/components/ProgressCircle.vue'
 
 // get the application state store and router
 const store = useAppStore()
@@ -41,20 +44,24 @@ const validationRules = [
     (v: string) => validateInput(v) || 'Input format is incorrect'
 ];
 
+// parameters
 let isValid = ref(false)
-
+let loading = ref(false)
 
 function validate() {
+    // check the validation rules
     isValid.value = validationRules.every(rule => rule(searchQuery.value) === true)
 }
 
 function validateInput(value: string): boolean {
+    // validate the input string
     const regex = /^(\d+(?:\.\d+)?|\d{1,2}d\s\d{1,2}m\s\d{1,2}(?:\.\d+)?s),\s*([+-]?\d+(?:\.\d+)?|[+-]?\d{1,2}h\s\d{1,2}m\s\d{1,2}(?:\.\d+)?s)(?:,\s*(\d+(?:\.\d+)?[dms]))?$/;
     return regex.test(value);
 }
 
 
 async function onSearch(): Promise<void> {
+    // perform the search
     if (isValid.value) {
         const [ra, dec, radius] = parseInput(searchQuery.value);
         if (ra && dec && radius) {
@@ -65,6 +72,7 @@ async function onSearch(): Promise<void> {
 
 
 function parseInput(input: string): [string, string, { radius: number, units: string }] | [] {
+    // parse the input string into RA, Dec, and radius
     const match = input.match(/^(\d+(?:\.\d+)?|\d{1,2}d\s\d{1,2}m\s\d{1,2}(?:\.\d+)?s),\s*([+-]?\d+(?:\.\d+)?|[+-]?\d{1,2}h\s\d{1,2}m\s\d{1,2}(?:\.\d+)?s)(?:,\s*(\d+(?:\.\d+)?[dms]))?$/);
     if (!match) return [];
 
@@ -81,6 +89,10 @@ function parseInput(input: string): [string, string, { radius: number, units: st
 }
 
 async function callApi(ra: string, dec: string, { radius, units }: { radius: number, units: string }): Promise<void> {
+    // perform the cone search API call
+
+    // turn on loading flag
+    loading.value = true;
     const endpoint = import.meta.env.VITE_API_URL + `/query/cone?ra=${ra}&dec=${dec}&radius=${radius}&units=${units}`
     await axios.get(endpoint)
         .then(response => {
@@ -88,6 +100,9 @@ async function callApi(ra: string, dec: string, { radius, units }: { radius: num
 
         // store the search results
         store.save_search_results(response.data);
+
+        // call done; turn off loading flag
+        loading.value = false;
 
         // Use Vue Router to navigate to the "results" page and pass the data as a route parameter
         router.push({ name: 'Results' });

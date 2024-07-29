@@ -62,6 +62,7 @@
               <template v-slot:append>
                 <v-icon size='large' :color="!valid ? 'error' : 'success'"></v-icon>
               </template>
+              <progress-circle :loading="loading"></progress-circle>
             </v-btn>
           </v-col>
           <v-col cols="4">
@@ -87,6 +88,7 @@ import { useRouter } from 'vue-router';
 import { useAppStore } from '@/store/app'
 import useStoredTheme from '@/composables/useTheme'
 import axiosInstance from '@/axios'
+import ProgressCircle from '@/components/ProgressCircle.vue'
 
 // get the application state store and router
 const store = useAppStore()
@@ -123,6 +125,8 @@ let radiusRules = [
 ]
 let idRules = [exclusiveFieldRule] //[(value: number) => !!value || 'Required field.']
 
+let loading = ref(false)
+
 // create initial state of formData
 let initFormData = {
   coords: '',
@@ -153,6 +157,9 @@ watch(formData, async () => {
 // events
 async function submit_form(this: any) {
     // Handle the search form submission here
+
+    // set loading flag
+    loading.value = true
 
     // manually validate form just for safe measure
     const formValid = await form.value.validate()
@@ -188,6 +195,9 @@ async function submit_form(this: any) {
           // handle the actual data results
           console.log("new", data)
 
+          // turn off loading flag
+          loading.value = false
+
           // store the search results
           store.save_search_results(data);
 
@@ -222,6 +232,7 @@ async function reset_form() {
   valid.value = false
   fail.value = false
   failmsg.value = ''
+  loading.value = false
 
   // Reset the form validation state
   await form.value.resetValidation();
@@ -231,6 +242,7 @@ async function set_fail(msg : string) {
   // set the fail flags
   fail.value = true
   failmsg.value = msg
+  loading.value = false
   console.error(msg)
 }
 
