@@ -7,7 +7,7 @@
     <!-- v-dialog for showing the resolution results -->
     <v-dialog v-model="dialog" scrollable width="auto">
         <v-card>
-            <v-card-title>Resolved Targets</v-card-title>
+            <v-card-title>Resolved Targets <progress-circle :loading="loading"></progress-circle></v-card-title>
             <v-card-subtitle>within 3 arcmin</v-card-subtitle>
             <v-card-text>
                 <v-banner v-if="err" class='ma-4' color="error" lines="one" icon="mdi-emoticon-sad">{{ err }}</v-banner>
@@ -30,6 +30,7 @@
 
 import { ref, defineProps, watch} from 'vue'
 import axios from 'axios'
+import ProgressCircle from '@/components/ProgressCircle.vue'
 
 // define which properties are passed in from the parent, i.e. ":xxx"
 const props = defineProps<{
@@ -37,10 +38,12 @@ const props = defineProps<{
     dec: Number
 }>()
 
+// parameters
 let dialog = ref(false)
 let header = ref([])
 let results = ref([])
 let err = ref(null)
+let loading = ref(false)
 
 header.value = [
     { title: "Main ID", key: "main_id" },
@@ -50,17 +53,21 @@ header.value = [
 ]
 
 async function fetchResolutionResults() {
+    // fetch the resolution results from Simbad via Valis
     err.value = null
+    loading.value = true
     // resolve the target coordinates using the valis endpoint
     const url = import.meta.env.VITE_API_URL + `/target/resolve/coord?coord=${props.ra}&coord=${props.dec}&cunit=deg&radius=3&runit=arcmin`;
 
     await axios.get(url)
     .then((response) => {
         results.value = response.data
+        loading.value = false
     })
     .catch((error) => {
         console.error("Axios fetch error: ", error);
         err.value = error.response.data.detail
+        loading.value = false
     })
 }
 
