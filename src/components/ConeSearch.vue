@@ -12,7 +12,7 @@
       >
       <template v-slot:prepend>
         <v-icon icon='mdi-help' size='small'
-        v-tippy="{content:'Enter a RA, Dec coordinate and optional radius, in format: [number][d/m/s]',
+        v-tippy="{content:'Enter a RA, Dec coordinate and optional radius, in format: [ra],[dec],[number][d/m/s]',
         placement:'left'}"></v-icon>
       </template>
       <template v-slot:append-inner>
