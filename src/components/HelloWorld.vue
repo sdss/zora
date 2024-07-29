@@ -35,8 +35,15 @@
                 dense
                 clearable
                 v-model="targetId"
+                placeholder="54459273"
+                hint="Enter an sdss_id value"
                 @keyup.enter="navigateToTarget"
               >
+                <template v-slot:prepend>
+                  <v-icon icon='mdi-help' size='small'
+                  v-tippy="{content:'The SDSS ID is a unique identifier for a SDSS target matched across all observations and source catalogs',
+                  placement:'left'}"></v-icon>
+                </template>
                 <template v-slot:append-inner>
                   <v-btn color="primary" @click="navigateToTarget">Go</v-btn>
                 </template>
