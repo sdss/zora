@@ -91,6 +91,12 @@
                 </v-icon>
             </template>
 
+             <!-- add checkmark for has_been_observed boolean -->
+             <template v-slot:item.has_been_observed="{ item }">
+                <v-icon>
+                {{ item.has_been_observed ? "mdi-checkbox-marked" : null }}
+                </v-icon>
+            </template>
             </v-data-table>
         </v-col>
     </v-row>
