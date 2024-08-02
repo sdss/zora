@@ -57,6 +57,19 @@
         </v-row>
 
         <v-row>
+          <v-col cols="12">
+            <v-switch
+              v-tippy="{content:'Toggle between only observed targets or all targets', placement: 'left', maxWidth:200}"
+              v-model="formData.observed"
+              color="success"
+              :label="`Targets: ${formData.observed ? 'Observed' : 'All'}`"
+              hide-details
+              inset
+            ></v-switch>
+          </v-col>
+        </v-row>
+
+        <v-row>
           <v-col cols="4">
             <v-btn rounded="lg" color='primary' @click="submit_form" size="large" :disabled="!valid" :append-icon="valid ? 'mdi-check-circle' : 'mdi-close-circle'">Search
               <template v-slot:append>
@@ -137,7 +150,8 @@ let initFormData = {
   units: 'degree',
   release: store.release,
   carton: '',
-  program: ''
+  program: '',
+  observed: true
 }
 // create dynamic bindings to form fields
 let formData = ref({ ...initFormData })
