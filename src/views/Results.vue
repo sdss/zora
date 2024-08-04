@@ -358,7 +358,7 @@ onMounted(() => {
         msg.value = 'No search results returned'
     } else {
         data.value = results
-        headers.value = Object.entries(data.value[0]).map((item)=> ({title: item[0], key: item[0], type: typeof item[1], description: store.get_description_from_db(item[0])}))
+        headers.value = Object.entries(data.value[0]).map((item)=> ({title: store.get_field_from_db(item[0], 'display_name'), key: item[0], type: typeof item[1], description: store.get_field_from_db(item[0], 'description')}))
         console.log('data', data.value)
         console.log('headers', headers.value)
 

@@ -77,9 +77,13 @@ export const useAppStore = defineStore('app', {
       return this.logged_in || (!this.logged_in && this.release.startsWith("DR"))
     },
 
-    get_description_from_db(column: string) {
+    get_field_from_db(column: string, field: string) {
       // looks up a db column description from the flattened db metadata
-      return this.flat_db[column] ? this.flat_db[column].description : null;
+
+      // set default value to the column name if the field is display_name, otherwise null
+      let default_val = (this.flat_db[column] === undefined && field === 'display_name') ? column : null
+
+      return this.flat_db[column] ? this.flat_db[column][field] : default_val;
     }
 
   },
