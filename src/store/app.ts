@@ -14,6 +14,7 @@ export const useAppStore = defineStore('app', {
     program_map: {},
     carton_map: {},
     db_info: {},
+    flat_db: {},
     theme: '',
   }),
   actions: {
@@ -74,6 +75,11 @@ export const useAppStore = defineStore('app', {
     is_allowed() {
       // checks if a user is logged in or if the release is public
       return this.logged_in || (!this.logged_in && this.release.startsWith("DR"))
+    },
+
+    get_description_from_db(column: string) {
+      // looks up a db column description from the flattened db metadata
+      return this.flat_db[column] ? this.flat_db[column].description : null;
     }
 
   },
