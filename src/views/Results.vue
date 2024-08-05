@@ -1,8 +1,9 @@
 <template>
     <v-container fluid>
-        <v-row>
-            <v-col md=12>
-                <h1>Results</h1>
+        <v-row dense no-gutters class="d-flex align-center">
+            <v-col cols="auto" class="d-flex align-center">
+                <v-btn variant='plain' density="compact" @mouseover="dialog = true" icon="mdi-help-circle-outline"></v-btn>
+                <h1 class="ml-2">Results</h1>
             </v-col>
         </v-row>
         <v-row dense>
@@ -23,6 +24,7 @@
             </v-col>
         </v-row>
 
+      <!-- results data table -->
       <v-row dense>
         <v-col md="12">
             <v-data-table
@@ -38,6 +40,7 @@
                 density="compact"
                 :search="search"
             >
+            <!-- table toolbar -->
             <template v-slot:top>
                 <v-toolbar flat density="compact" color="surface">
                 <v-card color="surface" variant="flat" class="ma-1">
@@ -52,7 +55,7 @@
                 <v-spacer></v-spacer>
                 <v-text-field
                     v-model="search"
-                    label="Filter results"
+                    label="Filter table"
                     prepend-inner-icon="mdi-magnify"
                     single-line
                     variant="outlined"
@@ -61,6 +64,11 @@
                 ></v-text-field>
 
                 </v-toolbar>
+            </template>
+
+            <!-- add hover tooltip to column ; retains column sorting -->
+            <template v-for="h in headers" v-slot:[`header.${h.key}`]="{ column }">
+                <span v-tippy="`${h.description}`">{{h.title}}</span>
             </template>
 
             <!-- adds a target page link to the sdss id column -->
@@ -101,6 +109,24 @@
         </v-col>
     </v-row>
     </v-container>
+
+    <!-- Results page help dialog window -->
+    <v-dialog v-model="dialog" max-width="500px">
+        <v-card>
+        <v-card-title class="text-h5">Information</v-card-title>
+        <v-divider class="mb-4"></v-divider>
+        <v-card-text>
+            Examine search results in the data-table on this page. Click on a column to sort the table.
+            Export the table, or subset, to a CSV or JSON file. Type in the Filter Box to filter
+            results by any row value.
+        </v-card-text>
+        <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" text @click="dialog = false">Close</v-btn>
+        </v-card-actions>
+        </v-card>
+    </v-dialog>
+
 </template>
 
 <script setup lang="ts">
@@ -120,6 +146,7 @@ const nodata = ref(false)
 const msg = ref('')
 const exportas = ref(null)
 const search = ref('')
+const dialog = ref(false)
 
 // 315.014, 25.299 (one row)
 // 278.232, 3.788, (19 rows) 0.05
@@ -331,8 +358,7 @@ onMounted(() => {
         msg.value = 'No search results returned'
     } else {
         data.value = results
-        //headers.value = Object.keys(results.value[0]).map((name) => ({ title: name, key: name }))
-        headers.value = Object.entries(data.value[0]).map((item)=> ({title: item[0], key: item[0], type: typeof item[1]}))
+        headers.value = Object.entries(data.value[0]).map((item)=> ({title: store.get_field_from_db(item[0], 'display_name'), key: item[0], type: typeof item[1], description: store.get_field_from_db(item[0], 'description')}))
         console.log('data', data.value)
         console.log('headers', headers.value)
 

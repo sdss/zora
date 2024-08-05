@@ -219,6 +219,10 @@ async function get_db_info() {
             console.log('db info', response.data)
             // store the db metadata
             store.db_info = response.data
+
+            // flatten the db_info object
+            store.flat_db =  Object.fromEntries(Object.entries(store.db_info).flatMap(([schema, table])=>Object.entries(table)))
+
         })
         .catch((error) => {
             console.error(error.toJSON())
