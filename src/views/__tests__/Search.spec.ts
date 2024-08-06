@@ -9,8 +9,6 @@ import * as directives from 'vuetify/directives'
 import { createTestingPinia } from '@pinia/testing'
 
 import Search from '../Search.vue'
-//import axiosInstance from '@/axios'
-
 
 // Mock the specific axiosInstance
 vi.mock('@/axios', () => ({
