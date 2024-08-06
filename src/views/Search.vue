@@ -123,7 +123,7 @@ const exclusiveFieldRule = () => {
 };
 
 // coordinate regex
-const re = /([0-9.hms\s:]+),\s*([+-]?[0-9.dms\s:]+)/gm;
+const re = /([0-9.hms\s:]+)(,|\s)+([+-]?[0-9.dms\s:]+)/gm;
 
 let coordRules = [
   // (value: string) => !!value || 'Required field.',
@@ -145,7 +145,7 @@ let initFormData = {
   coords: '',
   ra: '',
   dec: '',
-  radius: '',
+  radius: '0.1',
   id: '',
   units: 'degree',
   release: store.release,
@@ -185,47 +185,78 @@ async function submit_form(this: any) {
     }
 
     // extract out ra and dec fields from coords
-    [formData.value.ra, formData.value.dec] = formData.value.coords ? formData.value.coords.split(',') : ["", ""]
+    //[formData.value.ra, formData.value.dec] = formData.value.coords ? formData.value.coords.split(',') : ["", ""]
+    [formData.value.ra, formData.value.dec] = extract_coords(formData.value.coords)
     console.log('submitting', formData.value)
 
-    await axiosInstance.post('/query/main',
-        formData.value, {headers: {'Content-Type': 'application/json'}})
-        .then((response) => {
-          // handle the initial response
-            console.log(response)
+    // await axiosInstance.post('/query/main',
+    //     formData.value, {headers: {'Content-Type': 'application/json'}})
+    //     .then((response) => {
+    //       // handle the initial response
+    //         console.log(response)
 
-            // check for good status in response
-            if (response.data['status'] != 'success') {
-              let msg = `Response status failed: ${response.data['msg']}`
-              set_fail(msg)
-              throw new Error(msg)
-            }
+    //         // check for good status in response
+    //         if (response.data['status'] != 'success') {
+    //           let msg = `Response status failed: ${response.data['msg']}`
+    //           set_fail(msg)
+    //           throw new Error(msg)
+    //         }
 
-            // return the actual data
-            fail.value = false
-            return response.data['data']
-        })
-        .then((data) => {
-          // handle the actual data results
-          console.log("new", data)
+    //         // return the actual data
+    //         fail.value = false
+    //         return response.data['data']
+    //     })
+    //     .then((data) => {
+    //       // handle the actual data results
+    //       console.log("new", data)
 
-          // turn off loading flag
-          loading.value = false
+    //       // turn off loading flag
+    //       loading.value = false
 
-          // store the search results
-          store.save_search_results(data);
+    //       // store the search results
+    //       store.save_search_results(data);
 
-          // Use Vue Router to navigate to the "results" page and pass the data as a route parameter
-          router.push({ name: 'Results' });
-        })
-        .catch((error) => {
-          // catch any request failures
+    //       // Use Vue Router to navigate to the "results" page and pass the data as a route parameter
+    //       router.push({ name: 'Results' });
+    //     })
+    //     .catch((error) => {
+    //       // catch any request failures
 
-          // check the kind of error, axios or regular string
-          let msg = (typeof error.toJSON == 'function') ? error.toJSON().message : error
-          set_fail(`Request Error: ${msg}`)
-          // reset_form()
-        })
+    //       // check the kind of error, axios or regular string
+    //       let msg = (typeof error.toJSON == 'function') ? error.toJSON().message : error
+    //       set_fail(`Request Error: ${msg}`)
+    //       // reset_form()
+    //     })
+}
+
+function extract_coords(coords: string) {
+  // extract ra, dec coordinates from the input string and format them
+  console.log('coords', coords)
+  let [ra, dec] = ["", ""]
+  if (coords.includes(',')) {
+    [ra, dec] = coords.split(',')
+  } else if (coords.includes(' ')) {
+    let obj = coords.split(' ')
+    switch (obj.length) {
+      case 2:
+        // [ra, dec]
+        [ra, dec] = obj
+        break
+      case 3:
+        // [ra, "", dec]
+        [ra, dec] = [obj[0], obj[2]]
+      case 6:
+        // [hh, mm, ss, dd, mm, ss]
+        [ra, dec] = [obj.slice(0, 3).join(' '), obj.slice(3, 6).join(' ')]
+        break
+      default:
+        [ra, dec] = obj
+    }
+  } else {
+    [ra, dec] = ["", ""]
+  }
+  console.log('ra, dec', ra.trim(), dec.trim())
+  return [ra.trim(), dec.trim()]
 }
 
 async function revalidate() {
