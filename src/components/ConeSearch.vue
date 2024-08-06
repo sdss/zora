@@ -1,18 +1,20 @@
 <template>
+    <v-form ref="form">
     <v-text-field class="pt-2"
       label="Quick Cone Search"
       v-model="searchQuery"
       placeholder="315.014, 35.299, 0.1d"
-      hint="Enter a RA, Dec, radius"
+      hint="Enter an RA, Dec, and optional radius"
       :rules="validationRules"
       @input="validate"
       clearable
       validate-on-blur="true"
       @keyup.enter="onSearch"
+      @click:clear="onClear"
       >
       <template v-slot:prepend>
         <v-icon icon='mdi-help' size='small'
-        v-tippy="{content:'Enter a RA, Dec coordinate and optional radius, in format: [ra],[dec],[number][d/m/s]',
+        v-tippy="{content:'Enter a RA, Dec coordinate (degrees), and optional radius, in format: [ra],[dec],[number][d/m/s]. Default radius is 0.1 degree.',
         placement:'left'}"></v-icon>
       </template>
       <template v-slot:append-inner>
@@ -24,6 +26,7 @@
         </v-btn>
       </template>
     </v-text-field>
+    </v-form>
 </template>
 
 <script lang="ts" setup>
@@ -45,8 +48,11 @@ const validationRules = [
 ];
 
 // parameters
+let form = ref(null)
 let isValid = ref(false)
 let loading = ref(false)
+let regex = /^(\d+(?:\.\d+)?|\d{1,2}d\s\d{1,2}m\s\d{1,2}(?:\.\d+)?s)(,|\s)+([+-]?\d+(?:\.\d+)?|[+-]?\d{1,2}h\s\d{1,2}m\s\d{1,2}(?:\.\d+)?s)(?:(,|\s)+(\d+(?:\.\d+)?[dms]))?$/
+
 
 function validate() {
     // check the validation rules
@@ -55,8 +61,14 @@ function validate() {
 
 function validateInput(value: string): boolean {
     // validate the input string
-    const regex = /^(\d+(?:\.\d+)?|\d{1,2}d\s\d{1,2}m\s\d{1,2}(?:\.\d+)?s),\s*([+-]?\d+(?:\.\d+)?|[+-]?\d{1,2}h\s\d{1,2}m\s\d{1,2}(?:\.\d+)?s)(?:,\s*(\d+(?:\.\d+)?[dms]))?$/;
     return regex.test(value);
+}
+
+function onClear() {
+    // clear the search query
+    searchQuery.value = '';
+    isValid.value = false;
+    form.value.reset();
 }
 
 
@@ -73,10 +85,10 @@ async function onSearch(): Promise<void> {
 
 function parseInput(input: string): [string, string, { radius: number, units: string }] | [] {
     // parse the input string into RA, Dec, and radius
-    const match = input.match(/^(\d+(?:\.\d+)?|\d{1,2}d\s\d{1,2}m\s\d{1,2}(?:\.\d+)?s),\s*([+-]?\d+(?:\.\d+)?|[+-]?\d{1,2}h\s\d{1,2}m\s\d{1,2}(?:\.\d+)?s)(?:,\s*(\d+(?:\.\d+)?[dms]))?$/);
+    const match = input.match(regex);
     if (!match) return [];
 
-    let [ra, dec, radiusStr = "0.1d"] = match.slice(1);
+    let [ra, gap1, dec, gap2, radiusStr = "0.1d"] = match.slice(1);
     let units = 'degree';
     if (radiusStr.endsWith('m')) {
         units = 'arcmin';
