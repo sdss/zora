@@ -189,49 +189,49 @@ async function submit_form(this: any) {
     [formData.value.ra, formData.value.dec] = extract_coords(formData.value.coords)
     console.log('submitting', formData.value)
 
-    // await axiosInstance.post('/query/main',
-    //     formData.value, {headers: {'Content-Type': 'application/json'}})
-    //     .then((response) => {
-    //       // handle the initial response
-    //         console.log(response)
+    await axiosInstance.post('/query/main',
+        formData.value, {headers: {'Content-Type': 'application/json'}})
+        .then((response) => {
+          // handle the initial response
+            console.log(response)
 
-    //         // check for good status in response
-    //         if (response.data['status'] != 'success') {
-    //           let msg = `Response status failed: ${response.data['msg']}`
-    //           set_fail(msg)
-    //           throw new Error(msg)
-    //         }
+            // check for good status in response
+            if (response.data['status'] != 'success') {
+              let msg = `Response status failed: ${response.data['msg']}`
+              set_fail(msg)
+              throw new Error(msg)
+            }
 
-    //         // return the actual data
-    //         fail.value = false
-    //         return response.data['data']
-    //     })
-    //     .then((data) => {
-    //       // handle the actual data results
-    //       console.log("new", data)
+            // return the actual data
+            fail.value = false
+            return response.data['data']
+        })
+        .then((data) => {
+          // handle the actual data results
+          console.log("new", data)
 
-    //       // turn off loading flag
-    //       loading.value = false
+          // turn off loading flag
+          loading.value = false
 
-    //       // store the search results
-    //       store.save_search_results(data);
+          // store the search results
+          store.save_search_results(data);
 
-    //       // Use Vue Router to navigate to the "results" page and pass the data as a route parameter
-    //       router.push({ name: 'Results' });
-    //     })
-    //     .catch((error) => {
-    //       // catch any request failures
+          // Use Vue Router to navigate to the "results" page and pass the data as a route parameter
+          router.push({ name: 'Results' });
+        })
+        .catch((error) => {
+          // catch any request failures
 
-    //       // check the kind of error, axios or regular string
-    //       let msg = (typeof error.toJSON == 'function') ? error.toJSON().message : error
-    //       set_fail(`Request Error: ${msg}`)
-    //       // reset_form()
-    //     })
+          // check the kind of error, axios or regular string
+          let msg = (typeof error.toJSON == 'function') ? error.toJSON().message : error
+          set_fail(`Request Error: ${msg}`)
+          // reset_form()
+        })
 }
 
 function extract_coords(coords: string) {
   // extract ra, dec coordinates from the input string and format them
-  console.log('coords', coords)
+
   let [ra, dec] = ["", ""]
   if (coords.includes(',')) {
     [ra, dec] = coords.split(',')
@@ -255,7 +255,7 @@ function extract_coords(coords: string) {
   } else {
     [ra, dec] = ["", ""]
   }
-  console.log('ra, dec', ra.trim(), dec.trim())
+
   return [ra.trim(), dec.trim()]
 }
 
