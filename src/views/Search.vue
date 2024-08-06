@@ -13,6 +13,7 @@
               hint="Enter a RA, Dec coordinate in [decimal or hmsdms] format"
               :rules="coordRules"
               id="coords"
+              :disabled="coordsDisabled"
             />
           </v-col>
           <v-col md=4>
@@ -24,6 +25,7 @@
                 hint="Enter a search radius"
                 :rules="radiusRules"
                 id="radius"
+                :disabled="coordsDisabled"
             />
           </v-col>
           <v-col md=2>
@@ -33,6 +35,7 @@
                 label="Unit"
                 id="unit"
                 :items="['degree', 'arcmin', 'arcsec']"
+                :disabled="coordsDisabled"
             ></v-select>
           </v-col>
         </v-row>
@@ -46,8 +49,10 @@
               hint="Enter an SDSS identifier"
               :rules="idRules"
               id="id"
+              :disabled="idDisabled"
             />
           </v-col>
+          <!-- cartons and programs dropdown menus -->
           <v-col cols="4" md="4">
             <dropdown-select label="Programs" id="programs" :items="store.programs" v-model="formData.program"/>
           </v-col>
@@ -57,7 +62,8 @@
         </v-row>
 
         <v-row>
-          <v-col cols="12">
+          <v-col cols="3">
+            <!-- observed targets toggle -->
             <v-switch
               v-tippy="{content:'Toggle between only observed targets or all targets', placement: 'left', maxWidth:200}"
               v-model="formData.observed"
@@ -71,6 +77,7 @@
 
         <v-row>
           <v-col cols="4">
+            <!-- search button -->
             <v-btn rounded="lg" color='primary' @click="submit_form" size="large" :disabled="!valid" :append-icon="valid ? 'mdi-check-circle' : 'mdi-close-circle'">Search
               <template v-slot:append>
                 <v-icon size='large' :color="!valid ? 'error' : 'success'"></v-icon>
@@ -79,10 +86,12 @@
             </v-btn>
           </v-col>
           <v-col cols="4">
+            <!--revalidate search form -->
             <v-btn color="warning" rounded="lg" @click="revalidate" size="large">Revalidate
             </v-btn>
           </v-col>
           <v-col cols="4">
+            <!-- reset form -->
             <v-btn rounded="lg" @click="reset_form" size="large">Reset</v-btn>
           </v-col>
 
@@ -115,37 +124,35 @@ let form = ref(null);
 
 // set up validation rules
 
-const exclusiveFieldRule = () => {
-  const coordsFilled = !!formData.value.coords.trim()
-  const idFilled = !!formData.value.id.trim()
-  const good = (coordsFilled && !idFilled) || (!coordsFilled && idFilled)
-  return good || 'Either Coordinate or ID must be filled, but not both.'
-};
-
 // coordinate regex
-const re = /([0-9.hms\s:]+),\s*([+-]?[0-9.dms\s:]+)/gm;
+const re = /([0-9.hms\s:]+)(,|\s)+([+-]?[0-9.dms\s:]+)/gm;
 
 let coordRules = [
-  // (value: string) => !!value || 'Required field.',
-  exclusiveFieldRule,
   (value: string) => {
     if (!value) return true
     return value.match(re) != null || 'Value does not match sky coordinate regex'
   },
 ]
+let idRules = [
+  (value: number) => !isNaN(value) || 'Value must be a number.',
+]
+
 let radiusRules = [
   (value: number) => !isNaN(value) || 'Value must be a number.',
 ]
-let idRules = [exclusiveFieldRule] //[(value: number) => !!value || 'Required field.']
 
+
+// parameters
 let loading = ref(false)
+let coordsDisabled = ref(false)
+let idDisabled = ref(false)
 
 // create initial state of formData
 let initFormData = {
   coords: '',
   ra: '',
   dec: '',
-  radius: '',
+  radius: '0.1',
   id: '',
   units: 'degree',
   release: store.release,
@@ -163,6 +170,12 @@ let filteredCartons = ref([])
 
 // create watcher for the form validation
 watch(formData, async () => {
+  console.log('in watcher validate')
+
+  // update id/coords disabled states
+  idDisabled.value = !!formData.value.coords.trim()
+  coordsDisabled.value = !!formData.value.id.trim()
+
   const formValid = await form.value.validate(); // validate the form
   valid.value = formValid.valid; // update the valid state
 }, { deep: true }); // deep watch to track nested property changes
@@ -185,7 +198,7 @@ async function submit_form(this: any) {
     }
 
     // extract out ra and dec fields from coords
-    [formData.value.ra, formData.value.dec] = formData.value.coords ? formData.value.coords.split(',') : ["", ""]
+    [formData.value.ra, formData.value.dec] = extract_coords(formData.value.coords)
     console.log('submitting', formData.value)
 
     await axiosInstance.post('/query/main',
@@ -228,6 +241,36 @@ async function submit_form(this: any) {
         })
 }
 
+function extract_coords(coords: string) {
+  // extract ra, dec coordinates from the input string and format them
+
+  let [ra, dec] = ["", ""]
+  if (coords.includes(',')) {
+    [ra, dec] = coords.split(',')
+  } else if (coords.includes(' ')) {
+    let obj = coords.split(' ')
+    switch (obj.length) {
+      case 2:
+        // [ra, dec]
+        [ra, dec] = obj
+        break
+      case 3:
+        // [ra, "", dec]
+        [ra, dec] = [obj[0], obj[2]]
+      case 6:
+        // [hh, mm, ss, dd, mm, ss]
+        [ra, dec] = [obj.slice(0, 3).join(' '), obj.slice(3, 6).join(' ')]
+        break
+      default:
+        [ra, dec] = obj
+    }
+  } else {
+    [ra, dec] = ["", ""]
+  }
+
+  return [ra.trim(), dec.trim()]
+}
+
 async function revalidate() {
   // revalidate the search form
   const formValid = await form.value.validate()
@@ -247,6 +290,8 @@ async function reset_form() {
   fail.value = false
   failmsg.value = ''
   loading.value = false
+  idDisabled.value = false
+  coordsDisabled.value = false
 
   // Reset the form validation state
   await form.value.resetValidation();

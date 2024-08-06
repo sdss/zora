@@ -8,13 +8,14 @@ export default mergeConfig(
   defineConfig({
     test: {
       environment: 'jsdom',
-      logHeapUsage: false,
+      logHeapUsage: false,  // displays heap usage after each test, use for debugging
       exclude: [...configDefaults.exclude, 'e2e/*'],
       root: fileURLToPath(new URL('./', import.meta.url)),
       deps: {
         inline: ["vuetify"],
       },
-      globals: true
+      globals: true,
+      silent: true,  // Suppress all Vitest console logs
     }
   })
 )

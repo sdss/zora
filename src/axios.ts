@@ -1,5 +1,5 @@
 import axios from 'axios'
-import JSONbig from 'json-big'
+import JSONbig from 'json-bigint'
 
 // Defines the API instance in Axios with special handling for big integers.
 const axiosInstance = axios.create({

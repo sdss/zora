@@ -11,7 +11,7 @@
       <!-- How to Use Section -->
       <v-row>
         <v-col cols="12">
-            <v-expansion-panels :value="0">
+            <v-expansion-panels v-model="expanded">
             <v-expansion-panel
                 title="Getting Started"
                 text="Basic instructions on getting started with the website.">
@@ -110,6 +110,7 @@ useStoredTheme()
 
 const theme = useTheme()
 
+const expanded = ref([0]) // Start with the first panel expanded
 const resources = ref([
   {
     title: 'Data Access',
