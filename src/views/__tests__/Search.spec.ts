@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 
 import { createVuetify } from 'vuetify'
@@ -9,7 +9,17 @@ import * as directives from 'vuetify/directives'
 import { createTestingPinia } from '@pinia/testing'
 
 import Search from '../Search.vue'
+//import axiosInstance from '@/axios'
 
+
+// Mock the specific axiosInstance
+vi.mock('@/axios', () => ({
+  default: {
+    get: vi.fn(() => Promise.resolve({ data: 'mocked data' })),
+    post: vi.fn(),
+    // Add other methods as needed
+  },
+}));
 
 describe('Search', () => {
     const vuetify = createVuetify({ components, directives })
