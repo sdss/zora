@@ -11,11 +11,14 @@ export default mergeConfig(
       logHeapUsage: false,  // displays heap usage after each test, use for debugging
       exclude: [...configDefaults.exclude, 'e2e/*'],
       root: fileURLToPath(new URL('./', import.meta.url)),
-      deps: {
-        inline: ["vuetify"],
+      server: {
+        deps: {
+          inline: ["vuetify"],
+        }
       },
       globals: true,
       silent: true,  // Suppress all Vitest console logs
+      setupFiles: ['./vitest.setup.ts'],
     }
   })
 )
