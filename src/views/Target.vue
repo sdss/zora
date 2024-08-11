@@ -5,6 +5,7 @@
                 <v-banner type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-confused"><v-banner-text>No target ID specified in URL.</v-banner-text></v-banner>
             </v-col>
         </v-row>
+        <!-- target information panel -->
         <v-row v-else>
             <v-col md="3">
                 <h1> SDSS ID: {{ sdss_id }}</h1>
@@ -20,6 +21,8 @@
                     <data-download v-if="has_files" :files="files"></data-download>
                 </div>
             </v-col>
+
+            <!-- tabbed metadata panels -->
             <v-col md="9">
                 <v-card>
                     <v-tabs v-model="tab" color="secondary">
@@ -31,6 +34,7 @@
                     <v-card-text>
 
                         <v-window v-model="tab">
+                        <!-- metadata tab -->
                         <v-window-item key="meta" value="meta">
                             <v-progress-linear v-if="loading && !iserror" indeterminate color="blue-lighten-3" ></v-progress-linear>
                             <v-card v-else>
@@ -48,16 +52,23 @@
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
 
+                                    <!-- boss drp info -->
                                     <v-expansion-panel title="Boss Pipeline Info">
                                         <v-expansion-panel-text>
-                                            <v-data-table-virtual :items="convert_object(pipelines.boss)" density="compact"></v-data-table-virtual>
+                                            <v-data-table-virtual :items="convert_to_table(pipelines.boss, 'boss_drp')" density="compact">
+                                                <template v-slot:item.display_name="{ item }">
+                                                    <p v-tippy="item.description">{{ item.display_name }}</p>
+                                                </template>
+                                            </v-data-table-virtual>
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
+                                    <!-- apogee drp info -->
                                     <v-expansion-panel title="Apogee Pipeline Info">
                                         <v-expansion-panel-text>
                                             <v-data-table-virtual :items="convert_object(pipelines.apogee)" density="compact"></v-data-table-virtual>
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
+                                    <!-- astra drp info -->
                                     <v-expansion-panel title="Astra Pipeline Info">
                                         <v-expansion-panel-text>
                                             <v-data-table-virtual :items="convert_object(pipelines.astra)" density="compact"></v-data-table-virtual>
@@ -68,10 +79,17 @@
                             </v-card>
                         </v-window-item>
 
+                        <!-- sources tab -->
                         <v-window-item key="sources" value="sources">
-                            <v-data-table :items="sources" :headers="head" density="compact"></v-data-table>
+                            <v-data-table :items="sources" :headers="head" density="compact">
+                                <!-- parent catalog menu item -->
+                                <template v-slot:item.parent_catalogs="{ value }">
+                                    <parent-catalog :sdssid="sdss_id" :catalogs="value"></parent-catalog>
+                                </template>
+                            </v-data-table>
                         </v-window-item>
 
+                        <!-- cartons tab -->
                         <v-window-item key="cartons" value="cartons">
                             <v-data-table :items="carts" :headers="headcart" density="compact" :sort-by="cartSort"></v-data-table>
                         </v-window-item>
@@ -105,6 +123,7 @@ import AladinLite from '@/components/AladinLite.vue'
 import TargetResolver from '@/components/TargetResolver.vue'
 import DataDownload from '@/components/DataDownload.vue'
 import useStoredTheme from '@/composables/useTheme'
+import ParentCatalog from '@/components/ParentCatalog.vue'
 
 import axiosInstance from '@/axios'
 
@@ -129,7 +148,6 @@ let cartSort = [{ key: 'run_on', order: 'desc' }]
 let panels = ref([0])
 let files = ref([])
 let has_files = ref(false)
-let dialog = ref(false)
 
 let head = [
     {key: 'catalogid', title: 'CatalogID'},
@@ -137,7 +155,8 @@ let head = [
     {key: 'lead', title: 'Lead'},
     {key: 'ra_catalogid', title: 'RA'},
     {key: 'dec_catalogid', title: 'Dec'},
-    {key: 'n_associated', title: 'N_Associated'}
+    {key: 'n_associated', title: 'N_Associated'},
+    {key: 'parent_catalogs', title: 'Parent Catalogs'},
 ]
 
 function formatNumber (num, digit) {
