@@ -83,8 +83,8 @@
                         <v-window-item key="sources" value="sources">
                             <v-data-table :items="sources" :headers="head" density="compact">
                                 <!-- parent catalog menu item -->
-                                <template v-slot:item.parent_catalogs="{ value }">
-                                    <parent-catalog :sdssid="sdss_id" :catalogs="value"></parent-catalog>
+                                <template v-slot:item.parent_catalogs="{ item }">
+                                    <parent-catalog :sdssid="sdss_id" :catalogid="item.catalogid" :catalogs="item.parent_catalogs"></parent-catalog>
                                 </template>
                             </v-data-table>
                         </v-window-item>

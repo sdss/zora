@@ -96,12 +96,14 @@
 // define which properties are passed in from the parent, i.e. ":xxx"
 const props = defineProps<{
     sdssid: string,
+    catalogid: string,
     catalogs: Object,
 }>()
 
 let dialog = ref(false)
 let selected_catalog = ref('')
 let selected_key = ref('')
+let local_cache = ref({})
 
 const tableData = ref([])
 const headers = [
@@ -116,7 +118,7 @@ function openDialog(catalog: string, key: string) {
     dialog.value = true
     getParentCatalogData()
 }
-
+console.log('local_cache', local_cache)
 
 function updateTable(catalog: any, key: any) {
     // update the table on catalog selection
@@ -131,15 +133,49 @@ async function getParentCatalogData() {
     // resolve the target coordinates using the valis endpoint
     const url = `/target/parents/${selected_catalog.value}/${props.sdssid}`;
 
+    // use local cache if available
+    // temporary cache per target page load
+    // not sure if we want to store the parent catalog data in the global store?
+    let data = get_or_update_cache(null)
+    if (data) {
+        tableData.value = data
+        return
+    }
+
+    // fetch the parent catalog data
     await axiosInstance.get(url)
     .then((response) => {
         // convert response data to an array of objects for the data table; object keys match header field "key"
-        tableData.value = Object.entries(response.data).map((item)=> ({parameter: item[0], value: item[1]}))
+        let data = Object.entries(response.data).map((item)=> ({parameter: item[0], value: item[1]}))
+        tableData.value = get_or_update_cache(data)
     })
     .catch((error) => {
         console.error("Axios fetch error: ", error);
         tableData.value = []
     })
+}
+
+function get_or_update_cache(data: any) {
+    // get or update the local cache
+    // add intiial catalogid
+    if (!(props.catalogid in local_cache.value)) {
+        local_cache.value[props.catalogid] = {}
+    }
+
+    // add initial catalog name
+    if (!(selected_catalog.value in local_cache.value[props.catalogid])) {
+        local_cache.value[props.catalogid][selected_catalog.value] = data
+        return data
+    } else {
+        // get or update the cached data
+        let cache = local_cache.value[props.catalogid][selected_catalog.value]
+        if (cache === null) {
+            local_cache.value[props.catalogid][selected_catalog.value] = data
+            return data
+        } else {
+            return cache
+        }
+    }
 }
 
 function is_parent_empty(value: Object) {
