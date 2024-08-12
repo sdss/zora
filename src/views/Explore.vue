@@ -21,14 +21,34 @@
 <script lang="ts" setup>
 import A from 'aladin-lite'
 import useStoredTheme from '@/composables/useTheme'
+import { useRoute } from 'vue-router'
+
+// get the initial target from the route
+const route = useRoute()
+let target = ''
+let fov = null
+if (!route.query.ra || !route.query.dec) {
+    // load a default taraget
+    target = 'M101'
+    fov = 5
+} else {
+    // load a requested target
+    target = `${route.query.ra}, ${route.query.dec}`
+    fov = 0.1
+}
+console.log('target', target)
+
 
 // mount the stored theme
 useStoredTheme()
 
+
+console.log('route', route.query)
+
 let aladin = null
 
 A.init.then(() => {
-    aladin = A.aladin('#explore-aladin-lite', {target: 'M101', fov: 5, projection: "AIT",
+    aladin = A.aladin('#explore-aladin-lite', {target: target, fov: fov, projection: "AIT",
     survey: "P/PanSTARRS/DR1/color-z-zg-g", cooFrame: 'ICRSd', showCooGridControl: true,
     showSimbadPointerControl: true, showCooGrid: true, showContextMenu: true});
 

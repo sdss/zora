@@ -1,6 +1,6 @@
 <template>
     <!-- Add the Resolve Target Button below the AladinLite component -->
-    <v-btn rounded="0" class='mt-2' color="primary-darken-1" @click="dialog = true" v-tippy="'Resolve target coordinates to within 3 arcmin using Simbad'">
+    <v-btn rounded="0" class='mt-0' color="primary-darken-1" @click="dialog = true" v-tippy="'Resolve target coordinates to within 3 arcmin using Simbad'">
         Resolve Target
     </v-btn>
 
