@@ -131,7 +131,7 @@ async function getParentCatalogData() {
     // Populate table data with parent catalog info for the given sdssid and catalog name
 
     // resolve the target coordinates using the valis endpoint
-    const url = `/target/parents/${selected_catalog.value}/${props.sdssid}`;
+    const url = `/target/parents/${selected_catalog.value}/${props.sdssid}/?catalogid=${props.catalogid}`;
 
     // use local cache if available
     // temporary cache per target page load
@@ -146,7 +146,7 @@ async function getParentCatalogData() {
     await axiosInstance.get(url)
     .then((response) => {
         // convert response data to an array of objects for the data table; object keys match header field "key"
-        let data = Object.entries(response.data).map((item)=> ({parameter: item[0], value: item[1]}))
+        let data = Object.entries(response.data[0]).map((item)=> ({parameter: item[0], value: item[1]}))
         tableData.value = get_or_update_cache(data)
     })
     .catch((error) => {
