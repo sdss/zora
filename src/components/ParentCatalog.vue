@@ -96,7 +96,7 @@
 // define which properties are passed in from the parent, i.e. ":xxx"
 const props = defineProps<{
     sdssid: string,
-    catalogid: string,
+    catalogid: Number,
     catalogs: Object,
 }>()
 
@@ -118,7 +118,6 @@ function openDialog(catalog: string, key: string) {
     dialog.value = true
     getParentCatalogData()
 }
-console.log('local_cache', local_cache)
 
 function updateTable(catalog: any, key: any) {
     // update the table on catalog selection
