@@ -81,11 +81,18 @@
 
                         <!-- sources tab -->
                         <v-window-item key="sources" value="sources">
-                            <v-data-table :items="sources" :headers="head" density="compact">
+                            <v-data-table :items="sources" :headers="head" density="compact" :row-props="highlightRow">
                                 <!-- parent catalog menu item -->
                                 <template v-slot:item.parent_catalogs="{ item }">
                                     <parent-catalog :sdssid="sdss_id" :catalogid="item.catalogid" :catalogs="item.parent_catalogs"></parent-catalog>
                                 </template>
+                                <!-- icon for observed catalogids -->
+                                <template  v-slot:item.icon="{ item }">
+                                    <v-icon v-if="isHighlighted(item)" color="primary" v-tippy="'This catalogid has been observed.'">
+                                        mdi-check
+                                    </v-icon>
+                                </template>
+
                             </v-data-table>
                         </v-window-item>
 
@@ -150,6 +157,7 @@ let files = ref([])
 let has_files = ref(false)
 
 let head = [
+    { title: '', key:'icon', value: 'icon', sortable: false },
     {key: 'catalogid', title: 'CatalogID'},
     {key: 'version', title: 'Version'},
     {key: 'lead', title: 'Lead'},
@@ -269,6 +277,27 @@ function convert_to_table(dataObject, name) {
     })
 }
 
+function highlightRow(item) {
+    // highlight rows in the source catalog table for observed catalogids
+    let catids = Object.values(pipelines.value)
+        .map(ii => ii.catalogid)
+        .filter(catalogid => catalogid !== undefined).map(id => id.c.join(''))
+
+    if (catids.includes(item.item.catalogid.toString())) {
+        return {'class': 'highlighted-row'}
+    }
+}
+
+function isHighlighted(item) {
+    // add a checkbox to an observed catalogid in the source catalog table
+    let catids = Object.values(pipelines.value)
+        .map(ii => ii.catalogid)
+        .filter(catalogid => catalogid !== undefined).map(id => id.c.join(''))
+    return catids.includes(item.catalogid.toString()) // === 4295574590
+}
+
+
+
 onMounted(() => {
     // get database info
     get_db_info()
@@ -277,3 +306,14 @@ onMounted(() => {
     get_target_info()
 })
 </script>
+
+
+<style>
+.v-theme--light .highlighted-row {
+  background-color: rgba(0, 0, 0, 0.05) !important; /* Darker shade in light theme */
+}
+
+.v-theme--dark .highlighted-row {
+  background-color: rgba(255, 255, 255, 0.1) !important; /* Lighter shade in dark theme */
+}
+</style>
