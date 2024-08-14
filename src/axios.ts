@@ -4,7 +4,7 @@ import JSONbig from 'json-bigint'
 // Defines the API instance in Axios with special handling for big integers.
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  timeout: 60000,
+  timeout: 1800000,  // making timeout 30 minutes
   transformResponse: [
     function transform(data) {
       // Replacing the default transformResponse in axios because this uses JSON.parse and causes problems
