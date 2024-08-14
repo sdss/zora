@@ -55,8 +55,10 @@
           <!-- cartons and programs dropdown menus -->
           <v-col cols="4" md="4">
             <dropdown-select label="Programs" id="programs" :items="store.programs" v-model="formData.program"/>
-            <p class="text-body-2 font-weight-medium mt-1 text-primary" v-tippy="'Searches on programs may take a long time and/or time out. There is a time out limit of 30 minutes. For faster searches, we suggest combining it with a cone search, or searching by carton instead.'">
-              Program Caveat</p>
+            <v-row no-gutters class="d-flex align-center">
+            <p class="text-body-2 font-weight-medium mt-1 text-primary d-flex align-center" v-tippy="'Searches on programs may take a long time and/or time out. There is a time out limit of 30 minutes. For faster searches, we suggest combining it with a cone search, or searching by carton instead.'">
+              <v-icon class='align-center' size="x-small">mdi-help-circle-outline</v-icon>Program Caveat</p>
+            </v-row>
           </v-col>
           <v-col cols="4" md="4">
             <dropdown-select label="Cartons" id="cartons" :items="store.cartons" v-model="formData.carton"/>
