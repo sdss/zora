@@ -2,7 +2,7 @@
     <v-container fluid>
         <v-row dense no-gutters class="d-flex align-center">
             <v-col cols="auto" class="d-flex align-center">
-                <v-btn variant='plain' density="compact" @mouseover="dialog = true" icon="mdi-help-circle-outline"></v-btn>
+                <v-btn color='warning' variant='outlined' density="compact" @mouseover="dialog = true" icon="mdi-help"></v-btn>
                 <h1 class="ml-2">Results</h1>
             </v-col>
         </v-row>
@@ -310,16 +310,22 @@ const downloadBlob = (data: Array<Object>, filename: string, mimeType: string) =
     a.download = filename
     a.click()
     window.URL.revokeObjectURL(url)
+
+    // reset the export table button
+    exportas.value = null
 }
 
 const exportToCsv = () => {
     // export the table to CSV
     let csvRows = [];
-    // Add header
-    csvRows.push(headers.value.map(e => e.title).join(","));
+    // Add header, use the original column name
+    csvRows.push(headers.value.map(e => e.key).join(","));
+
+    // get the selected rows or all rows if none selected
+    let rows = selected.value.length > 0 ? selected.value : data.value
 
     // Add data
-    selected.value.forEach(row => {
+    rows.forEach(row => {
         let rowData = headers.value.map(header => JSON.stringify(row[header.key], (_, value) => {
             // Custom formatting can go here
             return value
@@ -334,8 +340,12 @@ const exportToCsv = () => {
 
 const exportToJson = () => {
     // export the table to JSON
+
+    // get the selected rows or all rows if none selected
+    let rows = selected.value.length > 0 ? selected.value : data.value
+
     const filename = "sdss_table_export.json"
-    const jsonContent = JSON.stringify(selected.value)
+    const jsonContent = JSON.stringify(rows, null, 2)
     downloadBlob(jsonContent, filename, "application/json")
 }
 
