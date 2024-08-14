@@ -1,5 +1,6 @@
 // Utilities
 import { defineStore } from 'pinia'
+import axiosInstance from '@/axios'
 
 export const useAppStore = defineStore('app', {
   state: () => ({
@@ -84,6 +85,29 @@ export const useAppStore = defineStore('app', {
       let default_val = (this.flat_db[column] === undefined && field === 'display_name') ? column : null
 
       return this.flat_db[column] ? this.flat_db[column][field] : default_val;
+    },
+
+    async get_db_info(refresh: boolean = true) {
+      // get the database metadata info for column descriptions and such
+      // always refresh
+
+      if (!refresh && Object.keys(this.db_info).length !== 0) {
+          console.log('db info already loaded')
+          return
+      }
+
+      await axiosInstance.get('/info/database')
+          .then((response) => {
+              // store the db metadata
+              this.db_info = response.data
+
+              // flatten the db_info object
+              this.flat_db =  Object.fromEntries(Object.entries(this.db_info).flatMap(([schema, table])=>Object.entries(table)))
+
+          })
+          .catch((error) => {
+              console.error(error.toJSON())
+          })
     }
 
   },
