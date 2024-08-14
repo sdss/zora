@@ -234,27 +234,27 @@ function check_files(data) {
     return empty ? false : true
 }
 
-async function get_db_info() {
+// async function get_db_info() {
 
-    if (Object.keys(store.db_info).length !== 0) {
-        console.log('db info already loaded')
-        return
-    }
+//     if (Object.keys(store.db_info).length !== 0) {
+//         console.log('db info already loaded')
+//         return
+//     }
 
-    await axiosInstance.get('/info/database')
-        .then((response) => {
-            console.log('db info', response.data)
-            // store the db metadata
-            store.db_info = response.data
+//     await axiosInstance.get('/info/database')
+//         .then((response) => {
+//             console.log('db info', response.data)
+//             // store the db metadata
+//             store.db_info = response.data
 
-            // flatten the db_info object
-            store.flat_db =  Object.fromEntries(Object.entries(store.db_info).flatMap(([schema, table])=>Object.entries(table)))
+//             // flatten the db_info object
+//             store.flat_db =  Object.fromEntries(Object.entries(store.db_info).flatMap(([schema, table])=>Object.entries(table)))
 
-        })
-        .catch((error) => {
-            console.error(error.toJSON())
-        })
-}
+//         })
+//         .catch((error) => {
+//             console.error(error.toJSON())
+//         })
+// }
 
 function convert_object( metadata) {
     // temp function for converting to table
@@ -300,7 +300,7 @@ function isHighlighted(item) {
 
 onMounted(() => {
     // get database info
-    get_db_info()
+    store.get_db_info()
 
     // get the available target info
     get_target_info()

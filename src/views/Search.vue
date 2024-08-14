@@ -311,6 +311,9 @@ async function set_fail(msg : string) {
 
 onMounted(() => {
 
+    // get database info
+    store.get_db_info()
+
   // set up API call endpoints
     let endpoints = [
         `/query/list/cartons`,
