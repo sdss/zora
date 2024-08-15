@@ -130,7 +130,7 @@ async function getParentCatalogData() {
     // Populate table data with parent catalog info for the given sdssid and catalog name
 
     // resolve the target coordinates using the valis endpoint
-    const url = `/target/parents/${selected_catalog.value}/${props.sdssid}/?catalogid=${props.catalogid}`;
+    const url = `/target/parents/${selected_catalog.value}/${props.sdssid}?catalogid=${props.catalogid}`;
 
     // use local cache if available
     // temporary cache per target page load
