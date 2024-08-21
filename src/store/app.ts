@@ -17,6 +17,7 @@ export const useAppStore = defineStore('app', {
     db_info: {},
     flat_db: {},
     theme: '',
+    aladin: null
   }),
   actions: {
     get_releases() {
@@ -108,11 +109,9 @@ export const useAppStore = defineStore('app', {
           .catch((error) => {
               console.error(error.toJSON())
           })
-    }
-
+    },
   },
   persist: {
-    enabled: true,
     strategies: [
       {
         key: 'app-release',
@@ -129,6 +128,6 @@ export const useAppStore = defineStore('app', {
         storage: sessionStorage,
         paths: ['theme']
       }
-    ],
+    ]
   },
 })
