@@ -18,13 +18,18 @@ const props = defineProps<{
     files: Array<string>,
 }>()
 
+// set the body attributes for solara popout
+let api = import.meta.env.VITE_API_URL + '/solara/'
+const vurl = new URL(api)
+const pathname = (vurl.pathname.endsWith('/')) ? vurl.pathname : vurl.pathname + '/'
+document.body.setAttribute('data-base-url', pathname)
+document.body.setAttribute('data-voila-host', vurl.origin)
 
 let iframe = ref(null)
 let valid = ref(false)
 let errmsg = ref('')
 let theme = useTheme()
 
-import.meta.env.VITE_API_URL + '/info/database'
 let url = ref(import.meta.env.VITE_API_URL + `/solara/embed/?release=IPL3&sdssid=${props.sdssid}&files=${props.files.join()}&theme=${theme.global.name.value}`)
 console.log('url', url)
 
