@@ -236,28 +236,6 @@ function check_files(data) {
     return empty ? false : true
 }
 
-// async function get_db_info() {
-
-//     if (Object.keys(store.db_info).length !== 0) {
-//         console.log('db info already loaded')
-//         return
-//     }
-
-//     await axiosInstance.get('/info/database')
-//         .then((response) => {
-//             console.log('db info', response.data)
-//             // store the db metadata
-//             store.db_info = response.data
-
-//             // flatten the db_info object
-//             store.flat_db =  Object.fromEntries(Object.entries(store.db_info).flatMap(([schema, table])=>Object.entries(table)))
-
-//         })
-//         .catch((error) => {
-//             console.error(error.toJSON())
-//         })
-// }
-
 function convert_object( metadata) {
     // temp function for converting to table
     return Object.entries(metadata).map(([key, value]) => ({ key, value }))
