@@ -67,16 +67,7 @@ const sortItems = (itemList, sortBy) => {
         const aValue = a[sortBy.key]
         const bValue = b[sortBy.key]
 
-        let alt = sortDesc ? 1 : -1
-        let agt = sortDesc ? -1 : 1
-        if (sortBy.key == 'dec_sdss_id') {
-            alt = sortDesc ? -1 : 1
-            agt = sortDesc ? 1 : -1
-        }
-
-        if (aValue < bValue) return alt;
-        if (aValue > bValue) return agt;
-        return 0
+        return sortDesc ? bValue - aValue : aValue - bValue
     })
 }
 
