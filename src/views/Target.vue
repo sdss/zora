@@ -17,6 +17,7 @@
                 <aladin-lite v-else :ra="metadata.ra_sdss_id" :dec="metadata.dec_sdss_id"></aladin-lite>
 
                 <div class="d-flex flex-column">
+                    <v-btn rounded="0" class='mt-2' color="orange-darken-1" v-tippy="'Go to target in the Sky View'" @click="gotoExplore">Explore on Sky</v-btn>
                     <target-resolver :ra="metadata.ra_sdss_id" :dec="metadata.dec_sdss_id"></target-resolver>
                     <data-download v-if="has_files" :files="files"></data-download>
                 </div>
@@ -122,7 +123,7 @@
 <script setup lang="ts">
 
 import { useAppStore } from '@/store/app'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 
 import Solara from '@/components/Solara.vue'
@@ -137,6 +138,7 @@ import axiosInstance from '@/axios'
 // get the application state store and router
 const store = useAppStore()
 const route = useRoute()
+const router = useRouter()
 
 // mount the stored theme
 useStoredTheme()
@@ -234,28 +236,6 @@ function check_files(data) {
     return empty ? false : true
 }
 
-// async function get_db_info() {
-
-//     if (Object.keys(store.db_info).length !== 0) {
-//         console.log('db info already loaded')
-//         return
-//     }
-
-//     await axiosInstance.get('/info/database')
-//         .then((response) => {
-//             console.log('db info', response.data)
-//             // store the db metadata
-//             store.db_info = response.data
-
-//             // flatten the db_info object
-//             store.flat_db =  Object.fromEntries(Object.entries(store.db_info).flatMap(([schema, table])=>Object.entries(table)))
-
-//         })
-//         .catch((error) => {
-//             console.error(error.toJSON())
-//         })
-// }
-
 function convert_object( metadata) {
     // temp function for converting to table
     return Object.entries(metadata).map(([key, value]) => ({ key, value }))
@@ -275,6 +255,12 @@ function convert_to_table(dataObject, name) {
 
         }
     })
+}
+
+function gotoExplore() {
+    // navigate to the explore page, open in a new tab
+    const routeData = router.resolve({ name: 'explore', query: { ra: metadata.value.ra_sdss_id, dec: metadata.value.dec_sdss_id }})
+    window.open(routeData.href, '_blank')
 }
 
 function highlightRow(item) {
