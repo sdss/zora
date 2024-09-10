@@ -36,6 +36,7 @@
                         slim
                         rounded="0"
                         class="text-none"
+                        @click="gotoTab(item)"
                         >{{ item.text }}<v-icon @click.stop="removeTab(item)">mdi-close</v-icon>
                         </v-tab>
                     </template>
@@ -91,6 +92,16 @@ let tabs = ref([])
 const childRefs = ref([])
 let aladin: any = null
 let objectSelected = ref(false)
+
+// compute average of an array
+const average = array => array.reduce((a, b) => JSON.parse(a) + JSON.parse(b)) / array.length;
+
+function gotoTab(item) {
+    // go to the tab's data average RA, Dec position
+    const ra = average(item.items.map(ii => ii.ra_sdss_id))
+    const dec = average(item.items.map(ii => ii.dec_sdss_id))
+    store.aladin.gotoRaDec(ra, dec)
+}
 
 function setupAladin() {
     // set up the main aladin lite viewer
