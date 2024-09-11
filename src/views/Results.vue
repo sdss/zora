@@ -10,9 +10,6 @@
             <v-col cols="2">
                 <export-table :data="rows" :short="false" />
             </v-col>
-            <v-col>
-                <v-btn color="primary" @click="sendtoSky">Explore on Sky</v-btn>
-            </v-col>
         </v-row>
 
         <v-row v-if="nodata">
