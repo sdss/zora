@@ -12,6 +12,13 @@
     show-select
     select-strategy="single">
 
+    <!-- top toolbar -->
+    <template v-slot:top>
+        <div class="d-flex align-center flex-wrap">
+            <ExportTable :data="props.items" :short="true"/>
+        </div>
+    </template>
+
     <template v-slot:item.sdss_id="{ item }">
         <router-link :to="{ name: 'target', params: { sdss_id: item.sdss_id } }" target="_blank">{{ item.sdss_id }}</router-link>
     </template>
@@ -22,6 +29,7 @@
 <script lang="ts" setup>
 import { useAppStore } from '@/store/app'
 import { ref, watch } from 'vue'
+import ExportTable from '@/components/ExportTable.vue'
 
 // define which properties are passed in from the parent, i.e. ":xxx"
 const props = defineProps<{
