@@ -8,13 +8,10 @@
         </v-row>
         <v-row dense>
             <v-col cols="2">
-                <v-select
-                    v-model="exportas"
-                    :items="['CSV', 'JSON']"
-                    label="Export table"
-                    outlined
-                    @update:modelValue="handleExport"
-                ></v-select>
+                <export-table :data="rows" :short="false" />
+            </v-col>
+            <v-col>
+                <v-btn color="primary" @click="sendtoSky">Explore on Sky</v-btn>
             </v-col>
         </v-row>
 
@@ -131,8 +128,9 @@
 
 <script setup lang="ts">
 import { useAppStore } from '@/store/app'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import useStoredTheme from '@/composables/useTheme'
+import ExportTable from '@/components/ExportTable.vue'
 
 // mount the stored theme
 useStoredTheme()
@@ -144,10 +142,13 @@ const selected = ref([])
 const headers = ref([])
 const nodata = ref(false)
 const msg = ref('')
-const exportas = ref(null)
 const search = ref('')
 const dialog = ref(false)
 
+// data for the export table component
+let rows = computed(() => {
+    return selected.value.length > 0 ? selected.value : data.value
+})
 // 315.014, 25.299 (one row)
 // 278.232, 3.788, (19 rows) 0.05
 //
@@ -300,63 +301,6 @@ const dialog = ref(false)
 //   'in_boss': false,
 //   'in_apogee': false,
 //   'in_astra': false}]
-
-const downloadBlob = (data: Array<Object>, filename: string, mimeType: string) => {
-    // download the data as a file blob
-    const blob = new Blob([data], { type: mimeType })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    a.click()
-    window.URL.revokeObjectURL(url)
-
-    // reset the export table button
-    exportas.value = null
-}
-
-const exportToCsv = () => {
-    // export the table to CSV
-    let csvRows = [];
-    // Add header, use the original column name
-    csvRows.push(headers.value.map(e => e.key).join(","));
-
-    // get the selected rows or all rows if none selected
-    let rows = selected.value.length > 0 ? selected.value : data.value
-
-    // Add data
-    rows.forEach(row => {
-        let rowData = headers.value.map(header => JSON.stringify(row[header.key], (_, value) => {
-            // Custom formatting can go here
-            return value
-        })).join(",");
-        csvRows.push(rowData);
-    });
-
-    let csvContent = csvRows.join("\r\n");
-    const filename = "sdss_table_export.csv"
-    downloadBlob(csvContent, filename, 'text/csv; charset=utf-8;')
-}
-
-const exportToJson = () => {
-    // export the table to JSON
-
-    // get the selected rows or all rows if none selected
-    let rows = selected.value.length > 0 ? selected.value : data.value
-
-    const filename = "sdss_table_export.json"
-    const jsonContent = JSON.stringify(rows, null, 2)
-    downloadBlob(jsonContent, filename, "application/json")
-}
-
-const handleExport = () => {
-    // toggle the type of table export
-    if (exportas.value === 'CSV') {
-        exportToCsv();
-    } else if (exportas.value === 'JSON') {
-        exportToJson();
-    }
-}
 
 onMounted(() => {
     // Retrieve the data from the store
