@@ -17,7 +17,8 @@ export const useAppStore = defineStore('app', {
     db_info: {},
     flat_db: {},
     theme: '',
-    aladin: null
+    aladin: null,
+    result_targs: []
   }),
   actions: {
     get_releases() {
@@ -88,6 +89,11 @@ export const useAppStore = defineStore('app', {
       return this.flat_db[column] ? this.flat_db[column][field] : default_val;
     },
 
+    set_result_data(data: any) {
+      // set search results target data
+      this.result_targs = data
+    },
+
     async get_db_info(refresh: boolean = true) {
       // get the database metadata info for column descriptions and such
       // always refresh
@@ -112,21 +118,22 @@ export const useAppStore = defineStore('app', {
     },
   },
   persist: {
+    omit: ['result_targs', 'aladin'],
     strategies: [
       {
         key: 'app-release',
         storage: sessionStorage,
-        paths: ['release', 'all_releases'],
+        pick: ['release', 'all_releases'],
       },
       {
         key: 'app-user',
         storage: sessionStorage,
-        paths: ['user', 'auth', 'logged_in'],
+        pick: ['user', 'auth', 'logged_in'],
       },
       {
         key: 'app-theme',
         storage: sessionStorage,
-        paths: ['theme']
+        pick: ['theme']
       }
     ]
   },
