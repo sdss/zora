@@ -1,9 +1,10 @@
 <template>
     <v-menu location="bottom">
     <template v-slot:activator="{ props }">
-        <v-btn v-if="$props.short" color="tonal" rounded="0" v-bind="props" icon="mdi-export"
+        <v-btn v-if="$props.short" color='primary' variant="tonal" rounded="0" v-bind="props" icon="mdi-export"
         v-tippy="{content: 'Export table to csv or json', placement: 'right-end'}"></v-btn>
-        <v-btn v-else color="tonal" rounded="0" v-bind="props" prepend-icon="mdi-export">
+        <v-btn v-else color='primary' variant="tonal" rounded="0" v-bind="props"
+        v-tippy="'Export table to csv or json'" prepend-icon="mdi-export">
             Export Table
         </v-btn>
     </template>
