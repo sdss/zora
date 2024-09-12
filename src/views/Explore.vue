@@ -60,7 +60,7 @@ import A from 'aladin-lite'
 import useStoredTheme from '@/composables/useTheme'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/store/app'
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, watch } from 'vue'
 import axiosInstance from '@/axios'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
@@ -91,6 +91,7 @@ let tab = ref(1)
 let tabs = ref([])
 const childRefs = ref([])
 let aladin: any = null
+const aladinReady = ref(false)
 let objectSelected = ref(false)
 
 // compute average of an array
@@ -103,7 +104,8 @@ function gotoTab(item) {
     store.aladin.gotoRaDec(ra, dec)
 }
 
-function setupAladin() {
+async function setupAladin() {
+    return new Promise<void>((resolve) => {
     // set up the main aladin lite viewer
     A.init.then(() => {
         aladin = A.aladin('#explore-aladin-lite',
@@ -111,7 +113,6 @@ function setupAladin() {
         survey: "P/PanSTARRS/DR1/color-z-zg-g", cooFrame: 'ICRSd', showCooGridControl: true, showFullscreenControl: false,
         showSimbadPointerControl: true, showCooGrid: true, showContextMenu: true, showSettingsControl: true});
 
-        store.aladin = aladin
 
         // UI button for SDSS cone search
         let csbtn = A.button({
@@ -187,7 +188,11 @@ function setupAladin() {
             }
         })
 
+        store.aladin = aladin
+        aladinReady.value = true
+        resolve()
     });
+})
 }
 
 async function coneSearch(ra: string, dec: string, radius: number, units: string, aladin: any): Promise<void> {
@@ -197,33 +202,14 @@ async function coneSearch(ra: string, dec: string, radius: number, units: string
     await axiosInstance.get(endpoint)
         .then(response => {
         // Handle the response data
-
         // if no results, do nothing
         if (response.data.length == 0) {
             return
         }
 
-        // get a unique name for the catalog
-        let name = aladin.view.makeUniqLayerName('Cone Search')
+        // add the results to a new tab
+        add_tab(response.data, 'Cone Search')
 
-        // add the results to a new Aladin catalog
-        let cat = addCatalog(response.data, aladin, name, 18)
-
-        // get a new tab index
-        nextTick()
-        const newIdx = tabs.value.length ? Math.max(...tabs.value.map(item => item.value)) + 1 : 1
-        cat.tabid = newIdx
-
-        // add a new tab entry
-        tabs.value.push({
-            text: name,
-            value: newIdx,
-            items: response.data,
-            headers: Object.entries(response.data[0]).map((item)=> ({title: item[0], key: item[0], type: typeof item[1], description: store.get_field_from_db(item[0], 'description')})),
-            catalog: cat})
-
-        // update the active tab
-        tab.value = tabs.value.length
         })
         .catch(error => {
         // Handle the error
@@ -283,9 +269,64 @@ async function removeTab(item) {
 
 }
 
+async function add_tab(data: Array<object>, title: string) {
+    // add new tabular and catalog data
 
-onMounted(() => {
-    setupAladin()
+    // get a unique name for the catalog
+    let name = store.aladin.view.makeUniqLayerName(title)
+
+    // add the results to a new Aladin catalog
+    let cat = addCatalog(data, store.aladin, name, 18)
+
+    await nextTick()
+    const newIdx = tabs.value.length ? Math.max(...tabs.value.map(item => item.value)) + 1 : 1
+    cat.tabid = newIdx
+
+    // add a new tab entry
+    tabs.value.push({
+        text: name,
+        value: newIdx,
+        items: data,
+        headers: Object.entries(data).map((item)=> ({title: item[0], key: item[0], type: typeof item[1], description: store.get_field_from_db(item[0], 'description')})),
+        catalog: cat})
+
+    // update the active tab
+    tab.value = tabs.value.length
+}
+
+async function check_targets() {
+    // check for targets pushed from the search results
+    console.log('checking targets')
+    if (store.result_targs.length === 0) {
+        console.log('No targets to check')
+        return
+    }
+
+    // add the search results to a new tab
+    await add_tab(store.result_targs, 'Search Results')
+
+    // go to the tab
+    await nextTick()
+    gotoTab(tabs.value[tab.value-1])
+    store.aladin.setFoV(0.1)
+
+    // reset the search results
+    store.result_targs.value = []
+
+}
+
+onMounted(async () => {
+    // wait for aladin to set up
+    await setupAladin()
+
+    // wait a tick before we check for target data to load data, to ensure aladin is fully set up
+    await nextTick(async() => {
+        setTimeout(async() => {
+            // Check targets and load catalog data here
+            await check_targets();
+        }, 500)
+    });
+
 })
 </script>
 
