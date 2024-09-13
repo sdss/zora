@@ -7,8 +7,13 @@
             </v-col>
         </v-row>
         <v-row dense>
-            <v-col cols="2">
+            <v-col cols="auto">
                 <export-table :data="rows" :short="false" />
+            </v-col>
+            <v-col cols="auto">
+                <v-btn rounded="0" color='warning' variant="tonal" @click="sendtoSky"
+                v-tippy="'Send results to the AladinLite sky viewer'"
+                >Explore on Sky</v-btn>
             </v-col>
         </v-row>
 
@@ -127,6 +132,7 @@
 import { useAppStore } from '@/store/app'
 import { ref, onMounted, computed } from 'vue'
 import useStoredTheme from '@/composables/useTheme'
+import { useRouter } from 'vue-router'
 import ExportTable from '@/components/ExportTable.vue'
 
 // mount the stored theme
@@ -134,6 +140,7 @@ useStoredTheme()
 
 // get the application state store and router
 const store = useAppStore()
+const router = useRouter()
 const data = ref([])
 const selected = ref([])
 const headers = ref([])
@@ -298,6 +305,17 @@ let rows = computed(() => {
 //   'in_boss': false,
 //   'in_apogee': false,
 //   'in_astra': false}]
+
+async function sendtoSky() {
+    // send the data to the sky viewer
+
+    // get the selected rows or all rows if none selected
+    let rows = selected.value.length > 0 ? selected.value : data.value
+
+    store.set_result_data(rows)
+    await router.push({ name: 'explore' })
+    //window.open(routeData.href, '_blank')
+}
 
 onMounted(() => {
     // Retrieve the data from the store
