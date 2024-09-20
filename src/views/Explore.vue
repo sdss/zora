@@ -16,7 +16,35 @@
             <splitpanes>
                 <!-- aladin-lite pane -->
                 <pane size="70">
-                    <div id="explore-aladin-lite" style="width: 100%; height: 100vh;"></div>
+                    <div id="explore-aladin-lite" style="width: 100%; height: 100vh;">
+                        <!-- moc vuetify ui component -->
+                        <div class="moc-content" style="width:300px">
+                            <v-list v-if='short' max-height="200px" slim density="compact" variant='plain' id="moclist">
+                                <v-list-item
+                                v-for="(item, index) in mocs"
+                                :key="index"
+                                >
+                                <v-btn rounded="0" variant="text" color='white' @click="get_moc(item)">{{ item }}</v-btn>
+                                </v-list-item>
+                            </v-list>
+                            <!-- temp conditional hack for testing -->
+                            <v-list v-else max-height="200px" slim density="compact" variant='plain' id="moclist">
+                                <v-list-item v-for="(item, index) in mocs" :key="index" class="align-center">
+                                    <v-row align="center" no-gutters class="w-100">
+                                        <v-col cols="auto">
+                                            <div class="text-left text-button">{{ item }}</div>
+                                        </v-col>
+                                        <v-col cols="auto" class="ml-auto">
+                                            <v-btn-toggle>
+                                                <v-btn v-tippy="'Add sky footprints'" icon="mdi-shape-polygon-plus" variant="text" color="white" @click="get_moc(item)"></v-btn>
+                                                <v-btn v-tippy="'Add hips source catalog'" icon="mdi-star-plus-outline" variant="text" color="white" @click="get_hipscat(item)"></v-btn>
+                                            </v-btn-toggle>
+                                        </v-col>
+                                    </v-row>
+                                </v-list-item>
+                            </v-list>
+                        </div>
+                    </div>
                 </pane>
                 <!-- data table pane -->
                 <pane size="30" min-size="2" v-if="tabs.length">
@@ -87,6 +115,8 @@ if (!route.query.ra || !route.query.dec) {
 useStoredTheme()
 
 // set parameters
+let short = ref(true) // temporary setting to trial both
+let mocs = ref([])
 let tab = ref(1)
 let tabs = ref([])
 const childRefs = ref([])
@@ -139,7 +169,7 @@ async function setupAladin() {
                     overlay.add(A.circle(lon, lat, c1 * p.r));
 
                     // perform the cone search
-                    await coneSearch(lon, lat, c1 * p.r, 'degree', aladin)
+                    await coneSearch(lon, lat, c1 * p.r, 'degree')
 
                     // remove the circle overlay
                     aladin.removeOverlay(overlay);
@@ -149,6 +179,38 @@ async function setupAladin() {
         })
 
         aladin.addUI(csbtn)
+
+        // Define the moc ui box
+        let mocbox = A.box({
+            header: {
+                title: "SDSS Sky Footprints (MOCs)",
+            },
+            // Adding a CSS class allowing you to position your window on the aladin lite view
+            classList: ['mocBox'],
+            //content: "This is the content of my window<br/> I can write proper html",
+            content: document.querySelectorAll('.moc-content')[0],
+        })
+        mocbox._hide();
+        aladin.addUI(mocbox)
+
+        // Define the button that toggles the box
+        let mocBtn = A.button({
+            content: '<span class="v-icon v-icon--size-large mdi mdi-blur-radial"></span>',
+            size: 'medium',
+            classList: ['mocBtn'],
+            tooltip: {content:'Display SDSS Sky Coverage'},
+            action(o) {
+                mocs.value = get_mocs()
+                if (mocbox.isHidden) {
+                    mocbox._show({
+                    })
+                } else {
+                    mocbox._hide()
+                }
+            }
+        });
+
+        aladin.addUI(mocBtn)
 
         // Handle clicks on different objects
         let objClicked: any = null
@@ -161,10 +223,12 @@ async function setupAladin() {
                 objectSelected.value = true
                 objClicked = object
                 object.select()
-                tab.value = object.catalog.tabid
-
-                // add the object selection to table selection
-                childRefs.value[object.catalog.tabid].updateSelection([object.data])
+                // only trigger if there is a tab
+                if (object.catalog.tabid) {
+                    tab.value = object.catalog.tabid
+                    // add the object selection to table selection
+                    childRefs.value[object.catalog.tabid].updateSelection([object.data])
+                }
 
             } else {
                 // run when background is selected
@@ -172,10 +236,12 @@ async function setupAladin() {
                 console.log('background clicked', objClicked)
                 objectSelected.value = false
                 objClicked.deselect()
-                objClicked.catalog.deselectAll()
-                // deselect everything in all table
-                childRefs.value.forEach(table => table && table.updateSelection([]))
-
+                // only trigger if there is a tab
+                if (objClicked.catalog.tabid) {
+                    objClicked.catalog.deselectAll()
+                    // deselect the object in the table
+                    childRefs.value.forEach(table => table && table.updateSelection([]))
+                }
             }
         })
 
@@ -186,6 +252,7 @@ async function setupAladin() {
             if (object && !objectSelected.value) {
                 childRefs.value.forEach(table => table && table.updateSelection([]))
             }
+            mocbox._hide()
         })
 
         store.aladin = aladin
@@ -195,7 +262,61 @@ async function setupAladin() {
 })
 }
 
-async function coneSearch(ra: string, dec: string, radius: number, units: string, aladin: any): Promise<void> {
+async function get_mocs() {
+    // get the list of available MOCs
+    await axiosInstance.get('mocs/list')
+        .then(response => {
+        // Handle the response data
+        console.log('mocs', response.data)
+        // remove the work releases
+        let data = response.data.filter((moc: string) => !moc.startsWith('sdsswork'))
+
+        // sort the moc entries by IPL -> DR -> rest
+        data.sort((a, b) => {
+            const getPriority = str => {
+                if (str.startsWith('ipl')) return 2
+                if (str.startsWith('dr')) return 1
+                return 0
+            };
+
+            const getNumber = str => {
+                const match = str.match(/(?:ipl|dr)(\d+)/)
+                return match ? parseInt(match[1], 10) : 0
+            };
+
+            const priorityDiff = getPriority(b) - getPriority(a)
+            if (priorityDiff !== 0) return priorityDiff
+            return getNumber(b) - getNumber(a)
+        })
+
+        mocs.value = data
+        })
+        .catch(error => {
+        // Handle the error
+        console.error('API call error:', error)
+        });
+}
+
+function get_moc(item) {
+    // get the MOC for the selected item
+    let [release, survey] = item.split(':')
+
+    let url = import.meta.env.VITE_API_URL + `/mocs/fits?survey=${survey}&release=${release}`
+    var moc = A.MOCFromURL(url,
+                {lineWidth: 3, name: `${survey}-moc`});
+                store.aladin.addMOC(moc);
+}
+
+function get_hipscat(item) {
+    // get the HIPS catalog for the selected item
+    let [release, survey] = item.split(':')
+
+    let url = import.meta.env.VITE_API_URL + `/static/mocs/${release}/${survey}`
+    var hips = A.catalogHiPS(url, {onClick: 'showTable', name: survey, sourceSize: 18});
+    aladin.addCatalog(hips);
+}
+
+async function coneSearch(ra: string, dec: string, radius: number, units: string): Promise<void> {
     // perform the cone search API call
 
     const endpoint = `/query/cone?ra=${ra}&dec=${dec}&radius=${radius}&units=${units}`
@@ -318,6 +439,7 @@ async function check_targets() {
 onMounted(async () => {
     // wait for aladin to set up
     await setupAladin()
+    console.log('aladin ready', store.aladin)
 
     // wait a tick before we check for target data to load data, to ensure aladin is fully set up
     await nextTick(async() => {
@@ -343,6 +465,22 @@ onMounted(async () => {
     position: absolute;
     top: 12.6rem;
     left: 0.2rem;
+}
+
+#moclist {
+    background-color: rgba(0,0,0,0.5);
+}
+
+.mocBtn {
+    position: absolute;
+    top: 15rem;
+    left: 0.2rem;
+}
+
+.mocBox {
+    position: absolute;
+    top: 15rem;
+    left: 2.5rem;
 }
 
 .aladin-table {
