@@ -472,7 +472,7 @@ onMounted(async () => {
 }
 
 .mocBtn {
-    position: absolute;
+    position: absolute !important;
     top: 15rem;
     left: 0.2rem;
 }
