@@ -1,5 +1,5 @@
 <template>
-    <v-form ref="form">
+    <v-form ref="form" @submit.prevent="onSearch">
     <v-text-field class="pt-2"
       label="Quick Cone Search"
       v-model="searchQuery"
@@ -9,7 +9,6 @@
       @input="validate"
       clearable
       validate-on-blur="true"
-      @keyup.enter="onSearch"
       @click:clear="onClear"
       >
       <template v-slot:prepend>
