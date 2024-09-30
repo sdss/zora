@@ -16,6 +16,7 @@ export const useAppStore = defineStore('app', {
     carton_map: {},
     db_info: {},
     flat_db: {},
+    dbkey_lookup: {},
     theme: '',
     aladin: null,
     result_targs: []
@@ -80,13 +81,56 @@ export const useAppStore = defineStore('app', {
       return this.logged_in || (!this.logged_in && this.release.startsWith("DR"))
     },
 
-    get_field_from_db(column: string, field: string) {
-      // looks up a db column description from the flattened db metadata
+    get_obj_from_db(column: string, context: Object = {}) {
+      // lookup the db metadata object for a column
+
+      // get all possible keys for the column name
+      const default_val = {}
+      const possibleKeys = this.dbkey_lookup[column]
+
+      if (!possibleKeys || possibleKeys.length === 0) {
+        // Column name not found in metadata
+        return default_val
+      } else if (possibleKeys.length === 1) {
+        // Unique column name, retrieve metadata directly
+        const fullKey = possibleKeys[0]
+        return this.flat_db[fullKey] || default_val
+      } else {
+        // Ambiguous column name
+        // Use context to resolve ambiguity
+        const { schema, table } = context;
+
+        let filteredKeys = possibleKeys;
+
+        if (schema) {
+          filteredKeys = filteredKeys.filter(key => key.startsWith(`${schema}.`));
+        }
+
+        if (table) {
+          filteredKeys = filteredKeys.filter(key => key.includes(`.${table}.`));
+        }
+
+        if (filteredKeys.length === 1) {
+          const fullKey = filteredKeys[0];
+          return this.flat_db[fullKey] || default_val;
+        } else if (filteredKeys.length > 1) {
+          // Still ambiguous after applying context
+          // return first match
+          return this.flat_db[filteredKeys[0]] || default_val;
+        } else {
+          // No matching keys after applying context
+          return default_val;
+        }
+      }
+    },
+
+    get_field_from_db(column: string, field: string, context: Object = {}) {
+      // looks up a db column field from the flattened db metadata object
 
       // set default value to the column name if the field is display_name, otherwise null
-      let default_val = (this.flat_db[column] === undefined && field === 'display_name') ? column : null
-
-      return this.flat_db[column] ? this.flat_db[column][field] : default_val;
+      const default_val = field === 'display_name' ? column : null;
+      const mapping = this.get_obj_from_db(column, context);
+      return mapping[field] || default_val;
     },
 
     set_result_data(data: any) {
@@ -107,9 +151,27 @@ export const useAppStore = defineStore('app', {
           .then((response) => {
               // store the db metadata
               this.db_info = response.data
+              console.log('db info loaded', this.db_info)
 
-              // flatten the db_info object
-              this.flat_db =  Object.fromEntries(Object.entries(this.db_info).flatMap(([schema, table])=>Object.entries(table)))
+              // flatten the db_info object, prefix schema to table.colum keys
+              this.flat_db = Object.fromEntries(
+                Object.entries(this.db_info).flatMap(([schema, table]) =>
+                  Object.entries(table).map(([key, value]) => [`${schema}.${key}`, value])
+                )
+              )
+
+              // preprocess the flattened metadata to create an index
+              // of column names to any resolved schema.table.column key names
+              this.dbkey_lookup = {};
+
+              for (const fullKey in this.flat_db) {
+                const parts = fullKey.split('.');
+                const columnName = parts[2];
+                if (!this.dbkey_lookup[columnName]) {
+                  this.dbkey_lookup[columnName] = [];
+                }
+                this.dbkey_lookup[columnName].push(fullKey);
+              }
 
           })
           .catch((error) => {

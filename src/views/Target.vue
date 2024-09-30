@@ -243,16 +243,13 @@ function convert_object( metadata) {
 
 function convert_to_table(dataObject, name) {
     // convert target data to v-data-table items with db metadata
-    let mappingObject = store.db_info[name]
     return Object.entries(dataObject).map(([key, value]) => {
-        //const mapping = Object.values(mappingObject).find(db => db[key])?.[key];
-        const mapping = mappingObject[key]
+        const mapping = store.get_obj_from_db(key, {'schema': name})
         return {
             display_name: mapping?.display_name || '',
             column_name: mapping?.column_name || key,
             value: value,
             description: mapping?.description || ''
-
         }
     })
 }
