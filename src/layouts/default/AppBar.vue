@@ -18,7 +18,8 @@
 
       <!-- page links -->
       <v-col class="d-none d-sm-flex" id="pagelinks">
-        <v-btn v-for="(item, i) in links" :key="i" :value="item" v-tippy="item.tippy"
+        <v-btn v-for="(item, i) in links" :key="i" :value="item"
+        v-tippy='{"content": `${item.tippy}`, "placement": "bottom", "popperOptions": {"strategy": "fixed"}}'
           :prepend-icon="item.icon">
           <RouterLink :to="item.site">{{item.text}}</RouterLink>
         </v-btn>
