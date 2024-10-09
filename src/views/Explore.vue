@@ -93,6 +93,7 @@ import axiosInstance from '@/axios'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import CatalogTable from '@/components/CatalogTable.vue'
+import HiPSList from '@/assets/aladinDefaultHipsList.js'
 
 // get the store
 const store = useAppStore()
@@ -141,8 +142,8 @@ async function setupAladin() {
         aladin = A.aladin('#explore-aladin-lite',
         {target: target, fov: fov, projection: "AIT",
         survey: "P/PanSTARRS/DR1/color-z-zg-g", cooFrame: 'ICRSd', showCooGridControl: true, showFullscreenControl: false,
-        showSimbadPointerControl: true, showCooGrid: true, showContextMenu: true, showSettingsControl: true});
-
+        showSimbadPointerControl: true, showCooGrid: true, showContextMenu: true, showSettingsControl: true,
+        hipsList: HiPSList.DEFAULT});
 
         // UI button for SDSS cone search
         let csbtn = A.button({
