@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
-    "aladin-lite": "^3.4.5",
+    "aladin-lite": "^3.5.1-beta",
     "axios": "^1.7.4",
     "core-js": "^3.38.0",
     "json-bigint": "^1.0.0",
