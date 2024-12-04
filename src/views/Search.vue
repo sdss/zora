@@ -42,13 +42,29 @@
         <v-row>
             <v-col cols="4" md="4">
             <!-- search id field -->
+            <v-select
+              v-model="searchType"
+              label="Search Type"
+              :items="['id', 'altid']"
+            ></v-select>
             <text-input
+              v-if="searchType === 'id'"
               v-model="formData.id"
               label="ID Search"
               placeholder="23326"
               hint="Enter an SDSS identifier"
               :rules="idRules"
               id="id"
+              :disabled="idDisabled"
+            />
+            <text-input
+              v-if="searchType === 'altid'"
+              v-model="formData.altid"
+              label="Alternative ID Search"
+              placeholder="apogee_id"
+              hint="Enter an alternative identifier"
+              :rules="altidRules"
+              id="altid"
               :disabled="idDisabled"
             />
           </v-col>
@@ -145,11 +161,17 @@ let radiusRules = [
   (value: number) => !isNaN(value) || 'Value must be a number.',
 ]
 
+let altidRules = [
+  (value: string) => !!value || 'Required field.',
+  (value: string) => /^[a-zA-Z0-9-]+$/.test(value) || 'Only alphanumeric characters and hyphens are allowed.',
+  (value: string) => /^[a-zA-Z0-9-]{1,50}$/.test(value) || 'Maximum length is 50 characters.',
+]
 
 // parameters
 let loading = ref(false)
 let coordsDisabled = ref(false)
 let idDisabled = ref(false)
+let searchType = ref('id')
 
 // create initial state of formData
 let initFormData = {
@@ -158,6 +180,7 @@ let initFormData = {
   dec: '',
   radius: '0.1',
   id: '',
+  altid: '',
   units: 'degree',
   release: store.release,
   carton: '',
@@ -178,7 +201,7 @@ watch(formData, async () => {
 
   // update id/coords disabled states
   idDisabled.value = !!formData.value.coords.trim()
-  coordsDisabled.value = !!formData.value.id.trim()
+  coordsDisabled.value = !!formData.value.id.trim() || !!formData.value.altid.trim()
 
   const formValid = await form.value.validate(); // validate the form
   valid.value = formValid.valid; // update the valid state
