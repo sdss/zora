@@ -29,13 +29,7 @@
             <v-card-title>Know a SDSS target ID?</v-card-title>
             <v-card-text>
               Input the SDSS ID of your target to go directly there
-              <v-select
-                v-model="searchType"
-                label="Search Type"
-                :items="['id', 'altid']"
-              ></v-select>
               <v-text-field class="pt-2"
-                v-if="searchType === 'id'"
                 label="Enter SDSS ID"
                 outlined
                 dense
@@ -54,28 +48,10 @@
                   <v-btn color="primary" @click="navigateToTarget">Go</v-btn>
                 </template>
               </v-text-field>
-              <v-text-field class="pt-2"
-                v-if="searchType === 'altid'"
-                label="Enter Alternative ID"
-                outlined
-                dense
-                clearable
-                v-model="altId"
-                placeholder="apogee_id"
-                hint="Enter an alternative identifier"
-                :rules="altidRules"
-                @keyup.enter="navigateToTarget"
-              >
-                <template v-slot:prepend>
-                  <v-icon icon='mdi-help' size='small'
-                  v-tippy="{content:'The alternative ID is a unique identifier for a target in an alternative catalog',
-                  placement:'left'}"></v-icon>
-                </template>
-                <template v-slot:append-inner>
-                  <v-btn color="primary" @click="navigateToTarget">Go</v-btn>
-                </template>
-              </v-text-field>
             </v-card-text>
+            <v-card-actions class="justify-center">
+              <p class="text-subtitle1">To input an alternate id, use the <a href="/search">full search form</a>.</p>
+            </v-card-actions>
           </v-card>
         </v-col>
       </v-row>
@@ -96,21 +72,9 @@ useStoredTheme()
 
 const router = useRouter();
 const targetId = ref('');
-const altId = ref('');
-const searchType = ref('id');
-
-const altidRules = [
-  (value: string) => !!value || 'Required field.',
-  (value: string) => /^[a-zA-Z0-9-]+$/.test(value) || 'Only alphanumeric characters and hyphens are allowed.',
-  (value: string) => /^[a-zA-Z0-9-]{1,50}$/.test(value) || 'Maximum length is 50 characters.',
-];
 
 const navigateToTarget = () => {
-  if (searchType.value === 'id' && targetId.value) {
-    router.push(`/target/${targetId.value}`);
-  } else if (searchType.value === 'altid' && altId.value) {
-    router.push(`/target/${altId.value}`);
-  }
+  router.push(`/target/${targetId.value}`);
 };
 
 </script>

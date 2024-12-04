@@ -40,15 +40,18 @@
           </v-col>
         </v-row>
         <v-row>
-            <v-col cols="4" md="4">
+            <v-col cols="2" md="2">
             <!-- search id field -->
             <v-select
               v-model="searchType"
-              label="Search Type"
-              :items="['id', 'altid']"
+              label="ID Type"
+              v-tippy="{content:'Select the type of identifier to search on', placement: 'left', maxWidth: 200}"
+              :items="['sdssid', 'altid']"
             ></v-select>
+            </v-col>
+            <v-col cols="3" md="3">
             <text-input
-              v-if="searchType === 'id'"
+              v-if="searchType === 'sdssid'"
               v-model="formData.id"
               label="ID Search"
               placeholder="23326"
@@ -61,22 +64,22 @@
               v-if="searchType === 'altid'"
               v-model="formData.altid"
               label="Alternative ID Search"
-              placeholder="apogee_id"
-              hint="Enter an alternative identifier"
+              placeholder="2M23595980+1528407"
+              hint="Enter an alternative identifier, e.g. an APOGEE_ID or catalogid"
               :rules="altidRules"
               id="altid"
               :disabled="idDisabled"
             />
           </v-col>
           <!-- cartons and programs dropdown menus -->
-          <v-col cols="4" md="4">
+          <v-col cols="auto" md="3">
             <dropdown-select label="Programs" id="programs" :items="store.programs" v-model="formData.program"/>
             <v-row no-gutters class="d-flex align-center">
             <p class="text-body-2 font-weight-medium mt-1 text-primary d-flex align-center" v-tippy="'Searches on programs may take a long time and/or time out. There is a time out limit of 30 minutes. For faster searches, we suggest combining it with a cone search, or searching by carton instead.'">
               <v-icon class='align-center' size="x-small">mdi-help-circle-outline</v-icon>Program Caveat</p>
             </v-row>
           </v-col>
-          <v-col cols="4" md="4">
+          <v-col cols="auto" md="3">
             <dropdown-select label="Cartons" id="cartons" :items="store.cartons" v-model="formData.carton"/>
           </v-col>
         </v-row>
@@ -162,16 +165,14 @@ let radiusRules = [
 ]
 
 let altidRules = [
-  (value: string) => !!value || 'Required field.',
-  (value: string) => /^[a-zA-Z0-9-]+$/.test(value) || 'Only alphanumeric characters and hyphens are allowed.',
-  (value: string) => /^[a-zA-Z0-9-]{1,50}$/.test(value) || 'Maximum length is 50 characters.',
+  (value: string) => (!!value ? /^[a-zA-Z0-9-+]+$/.test(value) : true) || 'Only alphanumeric characters and hyphens are allowed.',
 ]
 
 // parameters
 let loading = ref(false)
 let coordsDisabled = ref(false)
 let idDisabled = ref(false)
-let searchType = ref('id')
+let searchType = ref('sdssid')
 
 // create initial state of formData
 let initFormData = {
