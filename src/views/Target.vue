@@ -214,7 +214,9 @@ async function get_target_info() {
       carts.value = cartons
       sources.value = catalogs
       pipelines.value = pipes
-      files.value = Object.values(pipes.files).filter(x => x != null && x != '')
+      files.value = Object.values(pipes.files)
+        .flatMap(value => Array.isArray(value) ? value : [value])
+        .filter(filePath => filePath && filePath.trim() !== '');
       console.log('files', files.value, files.value.length)
       has_files.value = check_files(files.value)
       console.log('has_files', has_files.value)
