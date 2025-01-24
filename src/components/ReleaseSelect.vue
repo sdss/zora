@@ -51,7 +51,7 @@ async function get_releases() {
             // remove the MPLs and work release
             let rels = response.data.filter((rel: string) => !rel.startsWith("M") && !rel.startsWith("W")).reverse()
             // remove the older DRs for now; update this to only DR19 once it's available
-            rels = rels.filter((rel: string) => rel.startsWith("DR") ? parseInt(rel.slice(2)) >= 18 : rel)
+            rels = rels.filter((rel: string) => rel.startsWith("DR") ? parseInt(rel.slice(2)) >= 19 : rel)
             // filter out all IPL except IPL3 from rels
             rels = rels.filter((rel: string) => rel.startsWith("IPL") ? rel.endsWith("3") : rel)
             // store the releases and check for selection

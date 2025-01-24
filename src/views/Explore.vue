@@ -320,8 +320,8 @@ function get_hipscat(item) {
 async function coneSearch(ra: string, dec: string, radius: number, units: string): Promise<void> {
     // perform the cone search API call
 
-    const endpoint = `/query/cone?ra=${ra}&dec=${dec}&radius=${radius}&units=${units}`
-    await axiosInstance.get(endpoint)
+    const endpoint = `/query/cone?ra=${ra}&dec=${dec}&radius=${radius}&units=${units}&release=${store.release}`
+    await axiosInstance.get(endpoint, {headers: store.get_auth_hdr()})
         .then(response => {
         // Handle the response data
         // if no results, do nothing

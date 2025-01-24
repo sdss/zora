@@ -104,8 +104,8 @@ async function callApi(ra: string, dec: string, { radius, units }: { radius: num
 
     // turn on loading flag
     loading.value = true;
-    const endpoint = import.meta.env.VITE_API_URL + `/query/cone?ra=${ra}&dec=${dec}&radius=${radius}&units=${units}`
-    await axios.get(endpoint)
+    const endpoint = import.meta.env.VITE_API_URL + `/query/cone?ra=${ra}&dec=${dec}&radius=${radius}&units=${units}&release=${store.release}`;
+    await axios.get(endpoint, {headers: store.get_auth_hdr()})
         .then(response => {
         // Handle the response data
 
