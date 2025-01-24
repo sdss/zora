@@ -10,7 +10,10 @@
 import axios from 'axios'
 import { ref, onMounted, watch } from 'vue'
 import { useTheme } from 'vuetify'
+import { useAppStore } from '@/store/app'
 
+// get the application state store
+const store = useAppStore()
 
 // define which properties are passed in from the parent, i.e. ":xxx"
 const props = defineProps<{
@@ -30,7 +33,7 @@ let valid = ref(false)
 let errmsg = ref('')
 let theme = useTheme()
 
-let url = ref(import.meta.env.VITE_API_URL + `/solara/embed/?release=IPL3&sdssid=${props.sdssid}&files=${props.files.join()}&theme=${theme.global.name.value}`)
+let url = ref(import.meta.env.VITE_API_URL + `/solara/embed/?release=${store.release}&sdssid=${props.sdssid}&files=${props.files.join()}&theme=${theme.global.name.value}`)
 console.log('url', url)
 
 async function check_solara() {

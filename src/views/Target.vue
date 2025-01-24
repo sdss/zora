@@ -194,18 +194,18 @@ let headmeta = [
 async function get_target_info() {
     console.time('Info Time');
 
-    let rel = "IPL3"
+    //let rel = "IPL3"
 
     // set up API call endpoints
     let endpoints = [
-        `/target/ids/${sdss_id}?release=${rel}`,
-        `/target/cartons/${sdss_id}?release=${rel}`,
-        `/target/catalogs/${sdss_id}?release=${rel}`,
-        `/target/pipelines/${sdss_id}?release=${rel}`
+        `/target/ids/${sdss_id}?release=${store.release}`,
+        `/target/cartons/${sdss_id}?release=${store.release}`,
+        `/target/catalogs/${sdss_id}?release=${store.release}`,
+        `/target/pipelines/${sdss_id}?release=${store.release}`
         ]
 
     // await the promises
-    await Promise.all(endpoints.map((endpoint) => axiosInstance.get(endpoint)))
+    await Promise.all(endpoints.map((endpoint) => axiosInstance.get(endpoint, {headers: store.get_auth_hdr()})))
     .then(([{data: target}, {data: cartons}, {data: catalogs}, {data: pipes}] )=> {
       console.log({ target, cartons, catalogs, pipes })
       loading.value = false

@@ -229,8 +229,10 @@ async function submit_form(this: any) {
     [formData.value.ra, formData.value.dec] = extract_coords(formData.value.coords)
     console.log('submitting', formData.value)
 
+    let hdr1 = {'Content-Type': 'application/json'}
+    let hdr = {...hdr1, ...store.get_auth_hdr()}
     await axiosInstance.post('/query/main',
-        formData.value, {headers: {'Content-Type': 'application/json'}})
+        formData.value, {headers: hdr })
         .then((response) => {
           // handle the initial response
             console.log(response)

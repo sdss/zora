@@ -92,6 +92,10 @@
 <script setup lang="ts">
   import { ref, defineProps } from 'vue';
   import axiosInstance from '@/axios'
+  import { useAppStore } from '@/store/app'
+
+// get the application state store
+const store = useAppStore()
 
 // define which properties are passed in from the parent, i.e. ":xxx"
 const props = defineProps<{
@@ -130,7 +134,7 @@ async function getParentCatalogData() {
     // Populate table data with parent catalog info for the given sdssid and catalog name
 
     // resolve the target coordinates using the valis endpoint
-    const url = `/target/parents/${selected_catalog.value}/${props.sdssid}?catalogid=${props.catalogid}`;
+    const url = `/target/parents/${selected_catalog.value}/${props.sdssid}?catalogid=${props.catalogid}&release=${store.release}`;
 
     // use local cache if available
     // temporary cache per target page load
@@ -142,7 +146,7 @@ async function getParentCatalogData() {
     }
 
     // fetch the parent catalog data
-    await axiosInstance.get(url)
+    await axiosInstance.get(url, {headers: store.get_auth_hdr()})
     .then((response) => {
         // convert response data to an array of objects for the data table; object keys match header field "key"
         let data = Object.entries(response.data[0]).map((item)=> ({parameter: item[0], value: item[1]}))
