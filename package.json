@@ -38,7 +38,7 @@
     "@types/json-bigint": "^1.0.4",
     "@types/node": "^20.14.15",
     "@types/webfontloader": "^1.6.38",
-    "@vitejs/plugin-vue": "^5.1.2",
+    "@vitejs/plugin-vue": "^5.2.1",
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^12.0.0",
     "@vue/test-utils": "^2.4.6",
@@ -49,9 +49,9 @@
     "npm-run-all": "^4.1.5",
     "sass": "^1.77.8",
     "typescript": "^5.5.4",
-    "vite": "^5.4.6",
+    "vite": "^6.2.0",
     "vite-plugin-vuetify": "^2.0.4",
-    "vitest": "^1.6.1",
+    "vitest": "^3.0.7",
     "vue-tsc": "^2.0.29"
   }
 }
