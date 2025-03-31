@@ -15,6 +15,44 @@
     <!-- top toolbar -->
     <template v-slot:top>
         <div class="d-flex align-center flex-wrap">
+            <!-- target symbol legend -->
+            <v-dialog max-width="500">
+                <template v-slot:activator="{ props: activatorProps }">
+                <v-btn
+                    v-bind="activatorProps"
+                    rounded="0"
+                    variant="tonal"
+                    icon="mdi-symbol"
+                    v-tippy="{content: 'Legend for target symbols', placement: 'right-end'}"
+                ></v-btn>
+                </template>
+
+                <template v-slot:default="{ isActive }">
+                <v-card class="mx-auto" max-width="300">
+                    <v-list disabled>
+                    <v-list-subheader>Symbol Legend</v-list-subheader>
+
+                    <v-list-item v-for="(item, i) in targsymbols" :key="i">
+                        <template v-slot:prepend>
+                        <v-icon :icon="item.icon"></v-icon>
+                        </template>
+
+                        <v-list-item-title v-text="item.text"></v-list-item-title>
+                    </v-list-item>
+                    </v-list>
+                    <v-card-actions>
+                    <v-spacer></v-spacer>
+
+                    <v-btn
+                    text="Close"
+                    @click="isActive.value = false"
+                    ></v-btn>
+                    </v-card-actions>
+                </v-card>
+                </template>
+            </v-dialog>
+
+            <!-- export table button -->
             <ExportTable :data="props.items" :short="true"/>
         </div>
     </template>
@@ -47,6 +85,12 @@ let sortBy = ref([])
 let temph = Object.entries(props.items[0]).map((item)=> ({title: item[0], key: item[0], type: typeof item[1], description: store.get_field_from_db(item[0], 'description')}))
 let headers = reorderArrayObjects(temph, ['sdss_id', 'ra_sdss_id', 'dec_sdss_id', 'has_been_observed', 'in_boss', 'in_apogee', 'in_astra']);
 
+const targsymbols = [
+    { text: 'MWM-only', icon: 'mdi-square-outline' },
+    { text: 'BHM-only', icon: 'mdi-circle-outline' },
+    { text: 'BHM + MWM', icon: 'mdi-triangle-outline' },
+    { text: 'Astra DR17-processed', icon: 'mdi-close-outline' },
+  ]
 
 function reorderArrayObjects(arr, priorityOrder) {
   // Create a map for quick lookup of priority order

@@ -339,10 +339,27 @@ async function coneSearch(ra: string, dec: string, radius: number, units: string
         });
 }
 
+function setShape(source) {
+    // set the shape of the source based on its property
+    if (source.data.in_boss && !source.data.in_apogee ) {
+        // BHM-only
+        return 'circle'
+    } else if (!source.data.in_boss && source.data.in_apogee ) {
+        // MWM-only
+        return 'square'
+    } else if (source.data.in_boss && source.data.in_apogee && source.data.in_astra) {
+        // BHM-MWM-Astra
+        return 'triangle'
+    } else {
+        // Astra DR17-processed
+        return 'cross'
+    }
+}
+
 function addCatalog(data: Array<object>, aladin: any, name: string, size: number = 18) {
     // add a new aladin catalog of sources
 
-    var cat = A.catalog({name: name, sourceSize: size, onClick: 'showPopup'});
+    var cat = A.catalog({name: name, sourceSize: size, onClick: 'showPopup', shape: setShape});
     aladin.addCatalog(cat);
 
     // test marker with popup
