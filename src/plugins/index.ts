@@ -22,10 +22,18 @@ import { plugin as VueTippy } from 'vue-tippy'
 import 'tippy.js/dist/tippy.css' // optional for styling
 import 'tippy.js/themes/light-border.css'
 
+// Vue Papa parse
+import VuePapaParse from 'vue-papa-parse'
+
 
 export function registerPlugins(app: App) {
   loadFonts()
   app.use(vuetify).use(router).use(pinia)
+
+  // Vue Papa Parse
+  app.use(VuePapaParse, {
+
+  })
 
   // VueTippy plugin and options
   app.use(VueTippy, {
