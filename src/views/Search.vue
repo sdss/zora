@@ -200,7 +200,7 @@ let failmsg = ref('')
 let valid = ref(false)
 //let filteredCartons = ref([ ...store.cartons ])
 let filteredCartons = ref([])
-const fileUploaded = computed(() => formData.value.targetList && formData.value.targetList.data && formData.value.targetList.data.length > 0)
+const fileUploaded = computed(() => formData.value.targetList && formData.value.targetList.data && formData.value.targetList.valid)
 
 // create watcher for the form validation
 watch(formData, async () => {
@@ -216,7 +216,6 @@ watch(formData, async () => {
 
 // New watcher to update the default radius and units when targetList is set
 watch(() => formData.value.targetList, (newVal) => {
-  console.log('newVal', newVal)
   if (newVal && newVal.data && newVal.data.length > 0) {
     formData.value.radius = "0.1"
     formData.value.units = "arcmin"
@@ -428,6 +427,7 @@ async function reset_form() {
   loading.value = false
   idDisabled.value = false
   coordsDisabled.value = false
+  //formData.value.targetList.valid = false
 
   // Reset the form validation state
   await form.value.resetValidation();

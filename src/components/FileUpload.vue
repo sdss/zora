@@ -9,7 +9,8 @@
         <v-file-input
           v-model="file"
           label="Upload Target List"
-          accept=".txt,.csv"
+          accept=".txt,.csv,text/plain,text/csv"
+          :rules="checkFile"
           hide-details
           clearable
           dense
@@ -32,7 +33,7 @@
         subtitle="Upload a list of targets by id or coordinate"
       >
         <v-card-text>
-          Upload a CSV or TXT file of a list of coordinates or ids (limit of 100 targets). The first
+          Upload a CSV or TXT file of a list of coordinates or ids (limit of 200 targets). The first
           row should be a header row containing the name of the column(s). The
           'id' column name should be the type of identifier, e.g. "sdssid",
           "gaiaid", "catalogid",etc. See examples below.
@@ -89,6 +90,16 @@ const props = defineProps<{
 const instance = getCurrentInstance()
 const papa = instance.appContext.config.globalProperties.$papa
 
+// file validation rules
+let valid = ref(true)
+let checkFile = [
+  (value: string) => {
+    //console.log('checkFile:', value, valid.value, value && valid.value)
+    if (!value) return true
+    return value && valid.value || 'File has no validated targets.'
+  },
+]
+
 
 function handleChange() {
   console.log('file:', file.value)
@@ -100,7 +111,7 @@ function handleChange() {
     const fileContent = reader.result as string
     papa.parse(fileContent, {
       skipEmptyLines: true,
-      preview: 100, // limit to 100 targets
+      preview: 200, // limit to 200 targets
       header: true,
       transformHeader: (value: string) => value.replace("#", "").trim(),
       transform: (value: string) => value.trim(), // trim whitespace
@@ -148,7 +159,8 @@ function handleChange() {
           }
         }
         // update output target list
-        const output = { type: listType, data: validated }
+        valid.value = validated.length > 0
+        const output = { type: listType, data: validated, valid: validated.length > 0}
         message.value = `Validated ${validated.length} targets`
         emit('update:targetList', output)
       },
@@ -168,6 +180,7 @@ function handleChange() {
 const resetFile = () => {
     file.value = null
     message.value = ''
+    valid.value = true
 }
 
 // Expose the resetFile function to the parent
