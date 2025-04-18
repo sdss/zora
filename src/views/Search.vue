@@ -3,7 +3,11 @@
       <v-container>
         <v-row>
           <!-- width of all columns in a row should add up to 12 ;  see Vuetify Grid -->
-          <v-col md=6>
+          <v-col md="3">
+            <!-- file upload button -->
+            <file-upload v-model:targetList="formData.targetList" ref="fileUpload" />
+          </v-col>
+          <v-col md=5>
             <!-- use of the TextInput component -->
             <!-- search coordinate field -->
             <text-input
@@ -13,10 +17,10 @@
               hint="Enter a RA, Dec coordinate in [decimal or hmsdms] format"
               :rules="coordRules"
               id="coords"
-              :disabled="coordsDisabled"
+              :disabled="coordsDisabled || fileUploaded"
             />
           </v-col>
-          <v-col md=4>
+          <v-col md=2>
             <!-- search radius field -->
             <text-input
                 v-model="formData.radius"
@@ -25,7 +29,6 @@
                 hint="Enter a search radius"
                 :rules="radiusRules"
                 id="radius"
-                :disabled="coordsDisabled"
             />
           </v-col>
           <v-col md=2>
@@ -35,7 +38,6 @@
                 label="Unit"
                 id="unit"
                 :items="['degree', 'arcmin', 'arcsec']"
-                :disabled="coordsDisabled"
             ></v-select>
           </v-col>
         </v-row>
@@ -58,7 +60,7 @@
               hint="Enter an SDSS identifier"
               :rules="idRules"
               id="id"
-              :disabled="idDisabled"
+              :disabled="idDisabled || fileUploaded"
             />
             <text-input
               v-if="searchType === 'altid'"
@@ -68,19 +70,19 @@
               hint="Enter an alternative identifier, e.g. an APOGEE_ID or catalogid"
               :rules="altidRules"
               id="altid"
-              :disabled="idDisabled"
+              :disabled="idDisabled || fileUploaded"
             />
           </v-col>
           <!-- cartons and programs dropdown menus -->
           <v-col cols="auto" md="3">
-            <dropdown-select label="Programs" id="programs" :items="store.programs" v-model="formData.program"/>
+            <dropdown-select label="Programs" id="programs" :items="store.programs" v-model="formData.program" :disabled="fileUploaded"/>
             <v-row no-gutters class="d-flex align-center">
             <p class="text-body-2 font-weight-medium mt-1 text-primary d-flex align-center" v-tippy="'Searches on programs may take a long time and/or time out. There is a time out limit of 30 minutes. For faster searches, we suggest combining it with a cone search, or searching by carton instead.'">
               <v-icon class='align-center' size="x-small">mdi-help-circle-outline</v-icon>Program Caveat</p>
             </v-row>
           </v-col>
           <v-col cols="auto" md="3">
-            <dropdown-select label="Cartons" id="cartons" :items="store.cartons" v-model="formData.carton"/>
+            <dropdown-select label="Cartons" id="cartons" :items="store.cartons" v-model="formData.carton" :disabled="fileUploaded"/>
           </v-col>
         </v-row>
 
@@ -126,9 +128,10 @@
 
 <script setup lang="ts">
 
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import TextInput from '@/components/TextInput.vue'
 import DropdownSelect from '@/components/DropdownSelect.vue';
+import FileUpload from '@/components/FileUpload.vue'
 import { useRouter } from 'vue-router';
 import { useAppStore } from '@/store/app'
 import useStoredTheme from '@/composables/useTheme'
@@ -144,6 +147,7 @@ useStoredTheme()
 
 // set up a form reference, is the name in v-form ref="form"
 let form = ref(null);
+let fileUpload = ref(null)
 
 // set up validation rules
 
@@ -186,7 +190,8 @@ let initFormData = {
   release: store.release,
   carton: '',
   program: '',
-  observed: true
+  observed: true,
+  targetList: {}
 }
 // create dynamic bindings to form fields
 let formData = ref({ ...initFormData })
@@ -195,6 +200,7 @@ let failmsg = ref('')
 let valid = ref(false)
 //let filteredCartons = ref([ ...store.cartons ])
 let filteredCartons = ref([])
+const fileUploaded = computed(() => formData.value.targetList && formData.value.targetList.data && formData.value.targetList.valid)
 
 // create watcher for the form validation
 watch(formData, async () => {
@@ -208,13 +214,44 @@ watch(formData, async () => {
   valid.value = formValid.valid; // update the valid state
 }, { deep: true }); // deep watch to track nested property changes
 
+// New watcher to update the default radius and units when targetList is set
+watch(() => formData.value.targetList, (newVal) => {
+  if (newVal && newVal.data && newVal.data.length > 0) {
+    formData.value.radius = "0.1"
+    formData.value.units = "arcmin"
+  }
+})
+
+// batch processor for parallel requests
+// helps minimize network overhead
+async function processInBatches(endpoints, batchSize = 10) {
+  let results = []
+  for (let i = 0; i < endpoints.length; i += batchSize) {
+    const batch = endpoints.slice(i, i + batchSize)
+    try {
+      const batchResponses = await Promise.all(
+        batch.map(endpoint => axiosInstance.get(endpoint, { headers: store.get_auth_hdr() }))
+      )
+      results = results.concat(batchResponses)
+    } catch (error) {
+      set_fail(`Batch request error: ${error}`)
+      break
+    }
+  }
+  return results
+}
 
 // events
-async function submit_form(this: any) {
-    // Handle the search form submission here
+async function submit_form() {
 
-    // set loading flag
-    loading.value = true
+  console.log('submitting', formData.value)
+  const noList = Object.keys(formData.value.targetList).length == 0
+
+  // set loading flag
+  loading.value = true
+
+  // submit main form
+  if (noList) {
 
     // manually validate form just for safe measure
     const formValid = await form.value.validate()
@@ -224,51 +261,119 @@ async function submit_form(this: any) {
       set_fail(msg)
       return
     }
-
     // extract out ra and dec fields from coords
     [formData.value.ra, formData.value.dec] = extract_coords(formData.value.coords)
-    console.log('submitting', formData.value)
+    console.log('submitting main form', formData.value)
 
-    let hdr1 = {'Content-Type': 'application/json'}
-    let hdr = {...hdr1, ...store.get_auth_hdr()}
-    await axiosInstance.post('/query/main',
-        formData.value, {headers: hdr })
-        .then((response) => {
-          // handle the initial response
-            console.log(response)
+    // submit form request
+    await submit_request('/query/main', formData.value, 'post')
+    return
+  }
 
-            // check for good status in response
-            if (response.data['status'] != 'success') {
-              let msg = `Response status failed: ${response.data['msg']}`
-              set_fail(msg)
-              throw new Error(msg)
-            }
+  // or submit uploaded list of targets
+  const data = formData.value.targetList.data
+  if (formData.value.targetList.type == 'id') {
+    // list of target ids
+    const idtype = Object.keys(data[0])[0]
 
-            // return the actual data
-            fail.value = false
-            return response.data['data']
-        })
-        .then((data) => {
-          // handle the actual data results
-          console.log("new", data)
+    // collapse into list
+    let ids = data.map(x => Object.values(x)[0])
+    let iddata = {}
+    let base = ''
+    // set the correct endpoint and data
+    if (idtype == 'sdssid') {
+      base = '/query/sdssid'
+      iddata = {idtype: 'sdssid', sdss_id_list: ids, release: formData.value.release}
+    } else {
+      base = '/query/altids'
+      iddata = {idtype: idtype, altid_list: ids, release: formData.value.release}
+    }
 
-          // turn off loading flag
-          loading.value = false
+    // submit request
+    await submit_request(base, iddata, 'post')
 
-          // store the search results
-          store.save_search_results(data);
+  } else if (formData.value.targetList.type == 'coord') {
+    // list of target coordinates
 
-          // Use Vue Router to navigate to the "results" page and pass the data as a route parameter
-          router.push({ name: 'Results' });
-        })
-        .catch((error) => {
-          // catch any request failures
+    // create endpoints
+    let endpoints = data.map(x =>
+      import.meta.env.VITE_API_URL + `/query/cone?ra=${x.ra}&dec=${x.dec}&radius=${formData.value.radius}&units=${formData.value.units}&release=${formData.value.release}`
+    )
 
-          // check the kind of error, axios or regular string
-          let msg = (typeof error.toJSON == 'function') ? error.toJSON().message : error
-          set_fail(`Request Error: ${msg}`)
-          // reset_form()
-        })
+    // create promise to process in batches, limit to 10 concurrent calls
+    const responses = await processInBatches(endpoints, 10)
+    const aggregated = responses
+      .reduce((acc, res) => acc.concat(res.data), [])
+      .filter(x => Object.keys(x).length !== 0)
+
+    // resolve the promise
+    Promise.resolve(aggregated)
+      .then((data) => {
+        loading.value = false
+        store.save_search_results(data)
+        router.push({ name: 'Results' })
+      })
+      .catch((error) => {
+        let msg = (typeof error.toJSON === 'function') ? error.toJSON().message : error
+        set_fail(`Request Error: ${msg}`)
+      })
+  }
+
+}
+
+async function submit_request(base: string, data: object, http: string) {
+  // submit a generic request to the API
+
+  // set up request header
+  let hdr1 = {'Content-Type': 'application/json'}
+  let hdr = {...hdr1, ...store.get_auth_hdr()}
+  let request = null;
+
+  // assign the axios http instance
+  if (http == 'get') {
+    request = axiosInstance.get(base, {headers: hdr })
+  } else if (http == 'post') {
+    request = axiosInstance.post(base, data, {headers: hdr })
+  }
+
+  // await and resolve
+  await request
+  .then((response) => {
+    // handle the initial response
+      console.log('response', response)
+
+      // check for good status in response
+      if (('status' in response.data && response.data['status'] != 'success') || (response.status != 200)) {
+        let msg = `Response status failed: ${response.data['msg']}`
+        set_fail(msg)
+        throw new Error(msg)
+      }
+
+      // return the actual data
+      fail.value = false
+      return 'data' in response.data ? response.data['data'] : response.data
+  })
+  .then((data) => {
+    // handle the actual data results
+    console.log("new", data)
+
+    // turn off loading flag
+    loading.value = false
+
+    // store the search results
+    store.save_search_results(data);
+
+    // Use Vue Router to navigate to the "results" page and pass the data as a route parameter
+    router.push({ name: 'Results' });
+  })
+  .catch((error) => {
+    // catch any request failures
+
+    // check the kind of error, axios or regular string
+    let msg = (typeof error.toJSON == 'function') ? error.toJSON().message : error
+    set_fail(`Request Error: ${msg}`)
+    // reset_form()
+  })
 }
 
 function extract_coords(coords: string) {
@@ -322,9 +427,12 @@ async function reset_form() {
   loading.value = false
   idDisabled.value = false
   coordsDisabled.value = false
+  //formData.value.targetList.valid = false
 
   // Reset the form validation state
   await form.value.resetValidation();
+  // Updated call: use the internal exposed properties to access resetFile
+  fileUpload.value.resetFile();
 }
 
 async function set_fail(msg : string) {
