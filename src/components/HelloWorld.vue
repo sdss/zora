@@ -50,7 +50,7 @@
               </v-text-field>
             </v-card-text>
             <v-card-actions class="justify-center">
-              <p class="text-subtitle1">To input an alternate id, use the <a href="/search">full search form</a>.</p>
+              <p class="text-subtitle1">To input an alternate id, use the <router-link to="search">full search form</router-link>.</p>
             </v-card-actions>
           </v-card>
         </v-col>
