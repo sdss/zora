@@ -3,7 +3,7 @@
     <v-col md="12" class="d-flex flex-column">
       <!-- Banner -->
       <v-banner
-        v-if="store.release !== 'IPL3'"
+        v-if="!['IPL3', 'DR19'].includes(store.release)"
         class="ma-4"
         color="error"
         lines="one"
@@ -44,7 +44,7 @@ useStoredTheme()
 const store = useAppStore()
 
 let iframe = ref(null)
-let url = ref(import.meta.env.VITE_API_URL + `/solara/dashboard?theme=${store.theme}`)
+let url = ref(import.meta.env.VITE_API_URL + `/solara/dashboard?release=${store.release}&theme=${store.theme}`)
 
 // create watcher for the theme
 watch(() => store.theme, (newVal) => {

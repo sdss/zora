@@ -105,7 +105,7 @@ const links = [
       ]
 
 // Local state variable for showing the DataView button
-const showdataviz = computed(() => { return store.release === 'IPL3'})
+const showdataviz = computed(() => { return ['IPL3', 'DR19'].includes(store.release)})
 const dataviewlink = { text: 'DataView', icon: 'mdi-chart-scatter-plot', site: '/dataview', tippy: 'Explore SDSS output parameters' }
 
 // function to toggle the dark/light theme
