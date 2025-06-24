@@ -43,6 +43,7 @@ useStoredTheme()
 // get the application state store and router
 const store = useAppStore()
 
+document.cookie = `sdss_zora_base=${window.location.host}; path=/;`
 let iframe = ref(null)
 let url = ref(import.meta.env.VITE_API_URL + `/solara/dashboard?release=${store.release}&theme=${store.theme}`)
 
