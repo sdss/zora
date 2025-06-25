@@ -116,7 +116,7 @@ if (!route.query.ra || !route.query.dec) {
 useStoredTheme()
 
 // set parameters
-let short = ref(true) // temporary setting to trial both
+let short = ref(false) // temporary setting to trial both
 let mocs = ref([])
 let tab = ref(1)
 let tabs = ref([])
@@ -272,6 +272,11 @@ async function get_mocs() {
         // remove the work releases
         let data = response.data.filter((moc: string) => !moc.startsWith('sdsswork'))
 
+        // remove the IPLs if a user is not logged in
+        if (!store.logged_in) {
+            data = data.filter((moc: string) => !moc.startsWith('ipl'))
+        }
+
         // sort the moc entries by IPL -> DR -> rest
         data.sort((a, b) => {
             const getPriority = str => {
@@ -313,7 +318,7 @@ function get_hipscat(item) {
     let [release, survey] = item.split(':')
 
     let url = import.meta.env.VITE_API_URL + `/static/mocs/${release}/${survey}`
-    var hips = A.catalogHiPS(url, {onClick: 'showTable', name: survey, sourceSize: 18});
+    var hips = A.catalogHiPS(url, {onClick: 'showPopup', name: survey, sourceSize: 18});
     aladin.addCatalog(hips);
 }
 
