@@ -334,7 +334,8 @@ function get_source(item) {
                 "eboss": "spAll-dr17",
                 "apogee": "allStar-dr17",
                 "manga": "drpall",
-                "mastar": "drpall"}
+                "mastar": "drpall",
+                "allspec": "allspec"}
     let [release, survey] = item.split(':')
     return hipscat[survey]
 }
