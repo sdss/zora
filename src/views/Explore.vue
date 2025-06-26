@@ -24,7 +24,9 @@
                                 v-for="(item, index) in mocs"
                                 :key="index"
                                 >
-                                <v-btn rounded="0" variant="text" color='white' @click="get_moc(item)">{{ item }}</v-btn>
+                                <!-- <v-btn rounded="0" variant="text" color='white' @click="get_moc(item)">{{ item }}</v-btn> -->
+                                <v-btn v-tippy="'Load catalog from '+get_source(item)" rounded="0" variant="text" color='white' @click="get_hipscat(item)">{{ item }}</v-btn>
+
                                 </v-list-item>
                             </v-list>
                             <!-- temp conditional hack for testing -->
@@ -116,7 +118,7 @@ if (!route.query.ra || !route.query.dec) {
 useStoredTheme()
 
 // set parameters
-let short = ref(false) // temporary setting to trial both
+let short = ref(true) // temporary setting to trial both
 let mocs = ref([])
 let tab = ref(1)
 let tabs = ref([])
@@ -184,7 +186,7 @@ async function setupAladin() {
         // Define the moc ui box
         let mocbox = A.box({
             header: {
-                title: "SDSS Sky Footprints (MOCs)",
+                title: "SDSS Sky Catalogs",
             },
             // Adding a CSS class allowing you to position your window on the aladin lite view
             classList: ['mocBox'],
@@ -243,6 +245,9 @@ async function setupAladin() {
                     // deselect the object in the table
                     childRefs.value.forEach(table => table && table.updateSelection([]))
                 }
+
+                // close any popup windows
+                objClicked.popup.hide()
             }
         })
 
@@ -318,8 +323,20 @@ function get_hipscat(item) {
     let [release, survey] = item.split(':')
 
     let url = import.meta.env.VITE_API_URL + `/static/mocs/${release}/${survey}`
-    var hips = A.catalogHiPS(url, {onClick: 'showPopup', name: survey, sourceSize: 18});
+    var hips = A.catalogHiPS(url, {onClick: 'showPopup', name: survey, sourceSize: 10});
     aladin.addCatalog(hips);
+}
+
+function get_source(item) {
+    // get a source catalog name for the moc survey item
+    let hipscat = {"bhm": "spAll",
+                "mwm": "mwmTargets",
+                "eboss": "spAll-dr17",
+                "apogee": "allStar-dr17",
+                "manga": "drpall",
+                "mastar": "drpall"}
+    let [release, survey] = item.split(':')
+    return hipscat[survey]
 }
 
 async function coneSearch(ra: string, dec: string, radius: number, units: string): Promise<void> {
@@ -519,6 +536,23 @@ onMounted(async () => {
 
 .aladin-popupText {
     color: black;
+}
+
+.aladin-popup-container {
+    display: block;
+    max-width: 25rem;      /* limit max size */
+    min-width: 14rem;      /* reasonable minimum */
+    width: auto !important;
+    overflow-x: visible;   /* let contents expand naturally */
+    padding: 0.5rem 1rem;  /* optional: nicer spacing */
+}
+
+.aladin-popupText .aladin-marker-measurement > table {
+    width: 100%;           /* table fills popup width */
+    display: table;        /* default table display */
+    table-layout: auto;    /* natural column sizing */
+    overflow-x: auto;      /* horizontal scroll if needed */
+    word-break: break-all; /* only if long strings break layout */
 }
 
 .splitpanes__splitter {background-color: #ccc;position: relative;}
