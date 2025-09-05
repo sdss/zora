@@ -50,10 +50,10 @@ async function get_releases() {
             console.log('resp data', response.data)
             // remove the MPLs and work release
             let rels = response.data.filter((rel: string) => !rel.startsWith("M") && !rel.startsWith("W")).reverse()
-            // remove the older DRs for now; update this to only DR19 once it's available
+            // remove the older DRs for now;
             rels = rels.filter((rel: string) => rel.startsWith("DR") ? parseInt(rel.slice(2)) >= 19 : rel)
-            // filter out all IPL except IPL3 from rels
-            rels = rels.filter((rel: string) => rel.startsWith("IPL") ? rel.endsWith("3") : rel)
+            // filter out all IPL except >= IPL3 from rels
+            rels = rels.filter((rel: string) => rel.startsWith("IPL") ? parseInt(rel.slice(3)) >= 3 : rel)
             // store the releases and check for selection
             store.all_releases = rels
             store.check_release()
