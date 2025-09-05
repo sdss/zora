@@ -30,6 +30,7 @@
                         <v-tab value="meta">Metadata</v-tab>
                         <v-tab value="sources">Sources</v-tab>
                         <v-tab value="cartons">Cartons</v-tab>
+                        <v-tab v-if="metadata.has_legacy_data"value="legacy">Legacy SDSS</v-tab>
                     </v-tabs>
 
                     <v-card-text>
@@ -101,6 +102,20 @@
                         <v-window-item key="cartons" value="cartons">
                             <v-data-table :items="carts" :headers="headcart" density="compact" :sort-by="cartSort"></v-data-table>
                         </v-window-item>
+
+                        <!-- legacy tab -->
+                        <v-window-item key="legacy" value="legacy">
+                            <v-data-table :items="legacydata" :headers="headlegacy" density="compact">
+                                <!-- add checkmark for in_boss boolean -->
+                                <template v-slot:item.sas_url="{ item }">
+                                    <a :href="item.sas_url" target="_blank">link</a>
+                                </template>
+                                <!-- add checkmark for in_boss boolean -->
+                                <template v-slot:item.cas_url="{ item }">
+                                    <a :href="item.cas_url" target="_blank">link</a>
+                                </template>
+                            </v-data-table>
+                        </v-window-item>
                     </v-window>
                     </v-card-text>
                 </v-card>
@@ -153,6 +168,7 @@ let metadata = ref({})
 let sources = ref([])
 let carts = ref([])
 let pipelines = ref({})
+let legacydata = ref([])
 let cartSort = [{ key: 'run_on', order: 'desc' }]
 let panels = ref([0])
 let files = ref([])
@@ -191,6 +207,18 @@ let headmeta = [
     {key: 'value', title: 'Value'},
 ]
 
+let headlegacy = [
+    {key: 'sdss_phase', title: 'Phase'},
+    {key: 'observatory', title: 'Observatory'},
+    {key: 'survey', title: 'Survey'},
+    {key: 'instrument', title: 'Instrument'},
+    {key: 'programname', title: 'Program'},
+    {key: 'id', title: 'ID'},
+    {key: 'sas_file', title: 'Product'},
+    {key: 'sas_url', title: 'SAS'},
+    {key: 'cas_url', title: 'CAS'},
+]
+
 async function get_target_info() {
     console.time('Info Time');
 
@@ -201,22 +229,27 @@ async function get_target_info() {
         `/target/ids/${sdss_id}?release=${store.release}`,
         `/target/cartons/${sdss_id}?release=${store.release}`,
         `/target/catalogs/${sdss_id}?release=${store.release}`,
-        `/target/pipelines/${sdss_id}?release=${store.release}`
-        ]
+        `/target/pipelines/${sdss_id}?release=${store.release}`,
+        `/target/legacy/${sdss_id}`
+    ]
 
     // await the promises
     await Promise.all(endpoints.map((endpoint) => axiosInstance.get(endpoint, {headers: store.get_auth_hdr()})))
-    .then(([{data: target}, {data: cartons}, {data: catalogs}, {data: pipes}] )=> {
-      console.log({ target, cartons, catalogs, pipes })
+    .then(([{data: target}, {data: cartons}, {data: catalogs}, {data: pipes}, {data: legacy}] )=> {
+      console.log({ target, cartons, catalogs, pipes, legacy })
       loading.value = false
       nodata.value = Object.keys(target).length === 0
       metadata.value = target
       carts.value = cartons
       sources.value = catalogs
       pipelines.value = pipes
+      legacydata.value = legacy
+      // add files from pipelines
       files.value = Object.values(pipes.files)
         .flatMap(value => Array.isArray(value) ? value : [value])
         .filter(filePath => filePath && filePath.trim() !== '');
+      // add files from legacy data
+      files.value.push.apply(files.value, legacy.map(x => x.filepath) );
       console.log('files', files.value, files.value.length)
       has_files.value = check_files(files.value)
       console.log('has_files', has_files.value)
