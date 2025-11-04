@@ -20,7 +20,7 @@ COPY .env.testing .env.testing
 ENV BASE_URL=zora
 
 # Build the Vue.js app
-RUN npm run build
+RUN npm run build-only -- --mode testing
 
 # Set a label
 LABEL org.opencontainers.image.source https://github.com/sdss/zora
