@@ -38,10 +38,12 @@ let required = [
                 ]
 
 async function get_releases() {
-    if (Object.keys(store.all_releases).length !== 0) {
-          console.log('releases already stored')
-          return
-      }
+    // commenting out this cache check to always get new releases
+    // creates 2 calls
+    // if (Object.keys(store.all_releases).length !== 0) {
+    //       console.log('releases already stored')
+    //       return
+    //   }
 
     // function to get the data release from Valis
     // using public = false and a hard-coded public release to get all releases

@@ -4,14 +4,14 @@
       <!-- Orbit icon as drawer toggle button on small screens -->
       <v-col cols="auto" class="d-flex d-sm-none">
         <v-app-bar-nav-icon @click="drawer = !drawer">
-          <v-icon size='large' icon="mdi-orbit" color="deep-purple-lighten-2"/>
+          <v-icon size='large' :icon="devIcon" color="deep-purple-lighten-2"/>
         </v-app-bar-nav-icon>
       </v-col>
 
       <!-- Title area (visible on all screens) -->
       <v-col cols="auto" class="d-none d-sm-flex">
         <v-app-bar-title class="ma-2">
-          <v-icon icon="mdi-orbit" />
+          <v-icon :icon="devIcon" />
           SDSS
         </v-app-bar-title>
       </v-col>
@@ -96,6 +96,15 @@ import { useAppStore } from '@/store/app'
 const store = useAppStore()
 const drawer = ref(false);
 const theme = useTheme()
+
+// dev icon to indicate non-production mode
+const devIcon = computed(() => {
+  const mode = import.meta.env.MODE
+  if (mode !== 'production') {
+    return 'mdi-bug-outline'
+  }
+  return 'mdi-orbit'
+})
 
 const links = [
         { text: 'Home', icon: 'mdi-home', site: '/', tippy: 'Home - quick access to features' },
