@@ -17,7 +17,7 @@ COPY ./ .
 COPY .env.testing .env.testing
 
 # set the base URL environment variable
-ENV BASE_URL=zoratest
+ENV BASE_URL=zora
 
 # Build the Vue.js app
 RUN npm run build-only -- --mode testing
