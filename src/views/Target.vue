@@ -28,6 +28,7 @@
                 <v-card>
                     <v-tabs v-model="tab" color="secondary">
                         <v-tab value="meta">Metadata</v-tab>
+                        <v-tab value="pipes">Pipelines</v-tab>
                         <v-tab value="sources">Sources</v-tab>
                         <v-tab value="cartons">Cartons</v-tab>
                         <v-tab v-if="metadata.has_legacy_data"value="legacy">Legacy SDSS</v-tab>
@@ -54,8 +55,28 @@
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
 
+                                    <!-- astra source info -->
+                                    <v-expansion-panel title="Astra Source Info">
+                                        <v-expansion-panel-text>
+                                            <v-data-table-virtual :items="convert_object(pipelines.astra)" density="compact"></v-data-table-virtual>
+                                        </v-expansion-panel-text>
+                                    </v-expansion-panel>
+
+                                </v-expansion-panels>
+
+                            </v-card>
+                        </v-window-item>
+
+                        <!-- pipelines tab -->
+                        <v-window-item key="pipes" value="pipes">
+                            <v-progress-linear v-if="loading && !iserror" indeterminate color="blue-lighten-3" ></v-progress-linear>
+                            <v-card v-else>
+                                <v-banner v-if="nodata" type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-confused"><v-banner-text>No target information for release {{ store.release }}</v-banner-text></v-banner>
+                                <v-banner v-else-if="iserror" type="error" class='ma-4' color="error" lines="one" icon="mdi-emoticon-confused"><v-banner-text>{{ iserror }}</v-banner-text></v-banner>
+                                <v-expansion-panels v-else v-model="panels">
+
                                     <!-- boss drp info -->
-                                    <v-expansion-panel title="Boss Pipeline Info">
+                                    <v-expansion-panel title="Boss DRP Pipeline Info">
                                         <v-expansion-panel-text>
                                             <v-data-table-virtual :items="convert_to_table(pipelines.boss, 'boss_drp')" density="compact">
                                                 <template v-slot:item.display_name="{ item }">
@@ -65,20 +86,22 @@
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
                                     <!-- apogee drp info -->
-                                    <v-expansion-panel title="Apogee Pipeline Info">
+                                    <v-expansion-panel title="Apogee DRP Pipeline Info">
                                         <v-expansion-panel-text>
                                             <v-data-table-virtual :items="convert_object(pipelines.apogee)" density="compact"></v-data-table-virtual>
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
-                                    <!-- astra drp info -->
-                                    <v-expansion-panel title="Astra Pipeline Info">
+
+                                   <!-- astra pipelines info -->
+                                    <v-expansion-panel v-if="pipelines.astra_pipelines" title="Astra Pipelines">
                                         <v-expansion-panel-text>
-                                            <v-data-table-virtual :items="convert_object(pipelines.astra)" density="compact"></v-data-table-virtual>
+                                            <span><p>The available pipelines for this target. For detailed info, see the <a :href="astraPipelinesUrl" target="_blank">Pipelines in Astra</a> documentation.</p></span>
+                                            <astra-pipeline :sdssid="sdss_id" :pipelines="pipelines.astra_pipelines"></astra-pipeline>
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
                                 </v-expansion-panels>
-
                             </v-card>
+
                         </v-window-item>
 
                         <!-- sources tab -->
@@ -139,7 +162,7 @@
 
 import { useAppStore } from '@/store/app'
 import { useRoute, useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 import Solara from '@/components/Solara.vue'
 import AladinLite from '@/components/AladinLite.vue'
@@ -147,6 +170,7 @@ import TargetResolver from '@/components/TargetResolver.vue'
 import DataDownload from '@/components/DataDownload.vue'
 import useStoredTheme from '@/composables/useTheme'
 import ParentCatalog from '@/components/ParentCatalog.vue'
+import AstraPipeline from '@/components/AstraPipeline.vue'
 
 import axiosInstance from '@/axios'
 
@@ -294,6 +318,24 @@ function gotoExplore() {
     const routeData = router.resolve({ name: 'explore', query: { ra: metadata.value.ra_sdss_id, dec: metadata.value.dec_sdss_id }})
     window.open(routeData.href, '_blank')
 }
+
+// Computed property for Astra pipelines URL that updates with release changes
+const astraPipelinesUrl = computed(() => {
+    const release = store.release.toLowerCase()
+
+    if (release === 'ipl4') {
+        return 'https://ipl4-sdssorg.pantheonsite.io/ipl4/mwm/astra/pipelines-in-astra/'
+    } else {
+        // Determine DR version for standard SDSS.org URLs
+        let dr = 'dr19' // default
+        if (release === 'ipl3' || release === 'work') {
+            dr = 'dr19'
+        } else if (release.startsWith('dr')) {
+            dr = release
+        }
+        return `https://www.sdss.org/${dr}/mwm/astra/pipelines-in-astra/`
+    }
+})
 
 function highlightRow(item) {
     // highlight rows in the source catalog table for observed catalogids
