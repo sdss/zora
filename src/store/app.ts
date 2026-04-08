@@ -31,8 +31,6 @@ export const useAppStore = defineStore('app', {
       // update the selected release
       release ? '' : console.log('release cannot be null. setting to', this.all_releases[0])
       this.release = release || this.all_releases[0]
-      console.log('updating release', release)
-      console.log('meta env', import.meta.env)
     },
 
     check_release() {

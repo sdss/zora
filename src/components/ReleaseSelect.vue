@@ -39,7 +39,6 @@ let required = [
 
 async function get_releases() {
     // commenting out this cache check to always get new releases
-    // creates 2 calls
     // if (Object.keys(store.all_releases).length !== 0) {
     //       console.log('releases already stored')
     //       return
