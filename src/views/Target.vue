@@ -43,7 +43,7 @@
                             <v-card v-else>
                                 <v-banner v-if="nodata" type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-confused"><v-banner-text>No target information for release {{ store.release }}</v-banner-text></v-banner>
                                 <v-banner v-else-if="iserror" type="error" class='ma-4' color="error" lines="one" icon="mdi-emoticon-confused"><v-banner-text>{{ iserror }}</v-banner-text></v-banner>
-                                <v-expansion-panels v-else v-model="panels">
+                                <v-expansion-panels v-else v-model="metapanels">
 
                                     <v-expansion-panel title="Basic Info">
                                         <v-expansion-panel-text>
@@ -73,7 +73,7 @@
                             <v-card v-else>
                                 <v-banner v-if="nodata" type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-confused"><v-banner-text>No target information for release {{ store.release }}</v-banner-text></v-banner>
                                 <v-banner v-else-if="iserror" type="error" class='ma-4' color="error" lines="one" icon="mdi-emoticon-confused"><v-banner-text>{{ iserror }}</v-banner-text></v-banner>
-                                <v-expansion-panels v-else v-model="panels">
+                                <v-expansion-panels v-else v-model="pipepanels">
 
                                     <!-- boss drp info -->
                                     <v-expansion-panel title="Boss DRP Pipeline Info">
@@ -194,7 +194,8 @@ let carts = ref([])
 let pipelines = ref({})
 let legacydata = ref([])
 let cartSort = [{ key: 'run_on', order: 'desc' }]
-let panels = ref([0])
+let metapanels = ref([0])
+let pipepanels = ref(null)
 let files = ref([])
 let has_files = ref(false)
 
