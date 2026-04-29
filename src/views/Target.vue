@@ -79,9 +79,6 @@
                                     <v-expansion-panel title="Boss DRP Pipeline Info">
                                         <v-expansion-panel-text>
                                             <v-data-table-virtual :items="pipelines.boss" :headers="bosshead" density="compact">
-                                                <!-- <template v-slot:item.display_name="{ item }">
-                                                    <p v-tippy="item.description">{{ item.display_name }}</p>
-                                                </template> -->
                                                 <!-- pipe info menu item -->
                                                 <template v-slot:item.pipeinfo="{ item }">
                                                     <pipeline-info-modal
@@ -95,7 +92,7 @@
                                                     <v-icon v-if="item.specprimary">mdi-check</v-icon>
                                                 </template>
                                                 <template v-slot:item.stem="{ item }">
-                                                    <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank">{{ item.stem }}</a>
+                                                    <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank" rel="noopener noreferrer">{{ item.stem }}</a>
                                                     <span v-else>No file available</span>
                                                 </template>
                                             </v-data-table-virtual>
@@ -105,7 +102,6 @@
                                     <!-- apogee drp info -->
                                     <v-expansion-panel title="Apogee DRP Pipeline Info">
                                         <v-expansion-panel-text>
-                                            <!--<v-data-table-virtual :items="convert_object(pipelines.apogee)" density="compact"></v-data-table-virtual>-->
                                                 <v-expansion-panels variant="accordion" multiple v-model="apopanels">
                                                 <v-expansion-panel title="Stars">
                                                     <v-expansion-panel-text>
@@ -163,7 +159,7 @@
                                                             ></pipeline-info-modal>
                                                         </template>
                                                         <template #item.stem="{ item }">
-                                                        <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank">
+                                                        <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank" rel="noopener noreferrer" >
                                                             {{ item.stem }}
                                                         </a>
                                                         <span v-else>No file available</span>
@@ -182,7 +178,7 @@
                                         <v-expansion-panel-text>
                                             <v-data-table-virtual :headers="astraHead" :items="pipelines.astra.products" density="compact">
                                                 <template #item.stem="{ item }">
-                                                    <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank">
+                                                    <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank" rel="noopener noreferrer" >
                                                         {{ item.stem }}
                                                     </a>
                                                     <span v-else>No file available</span>
@@ -194,7 +190,7 @@
                                    <!-- astra pipelines info -->
                                     <v-expansion-panel v-if="pipelines.astra_pipelines" title="Astra Pipelines">
                                         <v-expansion-panel-text>
-                                            <span><p>The available pipelines for this target. For detailed info, see the <a :href="astraPipelinesUrl" target="_blank">Pipelines in Astra</a> documentation.</p></span>
+                                            <span><p>The available pipelines for this target. For detailed info, see the <a :href="astraPipelinesUrl" target="_blank" rel="noopener noreferrer">Pipelines in Astra</a> documentation.</p></span>
                                             <astra-pipeline :sdssid="sdss_id" :pipelines="pipelines.astra_pipelines"></astra-pipeline>
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
@@ -230,11 +226,11 @@
                             <v-data-table :items="legacydata" :headers="headlegacy" density="compact">
                                 <!-- add checkmark for in_boss boolean -->
                                 <template v-slot:item.sas_url="{ item }">
-                                    <a :href="item.sas_url" target="_blank">link</a>
+                                    <a :href="item.sas_url" target="_blank" rel="noopener noreferrer" >link</a>
                                 </template>
                                 <!-- add checkmark for in_boss boolean -->
                                 <template v-slot:item.cas_url="{ item }">
-                                    <a :href="item.cas_url" target="_blank">link</a>
+                                    <a :href="item.cas_url" target="_blank" rel="noopener noreferrer" >link</a>
                                 </template>
                             </v-data-table>
                         </v-window-item>
@@ -349,7 +345,7 @@ const apogeeVisitsHead = [
   { key: 'mjd', title: 'MJD' },
   { key: 'field', title: 'Field' },
   { key: 'stem', title: 'File' },
-{key: 'pipeinfo', title: 'Parameters'},
+  {key: 'pipeinfo', title: 'Parameters'},
 ]
 
 const astraHead = [

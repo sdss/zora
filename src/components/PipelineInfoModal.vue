@@ -116,7 +116,7 @@ const loading = ref(false) // Tracks whether a request is in progress.
 const error = ref('') // Stores the current error message.
 const selectedRow = ref<Record<string, any> | null>(null) // Stores the currently selected pipeline row.
 const tableData = ref<TableItem[]>([]) // Holds table-ready pipeline parameters.
-const cache = ref<Record<string, TableItem[]>>({}) // Caches transformed rows by dbid.
+const cache = ref<Record<string, TableItem[]>>({}) // Caches transformed rows by release and dbid.
 
 // Defines the table headers.
 const headers = [
@@ -158,7 +158,26 @@ function rowDbid(row: Record<string, any>): string {
 
 /** Build a stable key for each selectable row. */
 function rowKey(row: Record<string, any>, index: number): string {
-    return rowDbid(row) || `${props.source.pipeline}-row-${index}`
+    const dbid = rowDbid(row)
+    if (!dbid) return `${props.source.pipeline}-row-${index}`
+
+    if (props.source.pipeline === 'apogee') {
+        const obstype = row._rowtype || 'star'
+        return `${dbid}:${obstype}`
+    }
+
+    return dbid
+}
+
+/** Build a cache key from release, dbid, and pipeline label. */
+function buildCacheKey(row: Record<string, any>, dbid: string): string {
+    if (props.source.pipeline === 'boss') {
+        const coadd = row.coadd ? String(row.coadd) : 'none'
+        return `${store.release}:${dbid}:${coadd}`
+    }
+
+    const obstype = row._rowtype || 'star'
+    return `${store.release}:${dbid}:${obstype}`
 }
 
 /** Format the visible label for a selectable row. */
@@ -250,8 +269,11 @@ async function selectRow(row: Record<string, any>) {
         return
     }
 
-    if (cache.value[dbid]) {
-        tableData.value = cache.value[dbid]
+    // Build a release-aware cache key for this row.
+    const cacheKey = buildCacheKey(row, dbid)
+
+    if (cache.value[cacheKey]) {
+        tableData.value = cache.value[cacheKey]
         return
     }
 
@@ -283,7 +305,7 @@ async function selectRow(row: Record<string, any>) {
         .then(({ data }) => {
             // Transform API data and store it in cache.
             const transformed = toTableData(data || {})
-            cache.value[dbid] = transformed
+            cache.value[cacheKey] = transformed
             tableData.value = transformed
         })
         .catch((err) => {
