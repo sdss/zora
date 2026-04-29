@@ -84,14 +84,19 @@
                                                 </template> -->
                                                 <!-- pipe info menu item -->
                                                 <template v-slot:item.pipeinfo="{ item }">
-                                                    <v-btn color="success" density="compact" rounded="0" variant="tonal">Show</v-btn>
+                                                    <pipeline-info-modal
+                                                        :sdssid="sdss_id"
+                                                        :rows="pipelines.boss || []"
+                                                        :summary-row="item"
+                                                        :source="{ pipeline: 'boss' }"
+                                                    ></pipeline-info-modal>
                                                 </template>
                                                 <template v-slot:item.specprimary="{ item }">
                                                     <v-icon v-if="item.specprimary">mdi-check</v-icon>
                                                 </template>
                                                 <template v-slot:item.stem="{ item }">
                                                     <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank">{{ item.stem }}</a>
-                                                    <span v-else>No product available</span>
+                                                    <span v-else>No file available</span>
                                                 </template>
                                             </v-data-table-virtual>
                                         </v-expansion-panel-text>
@@ -111,15 +116,25 @@
                                                         density="compact"
                                                         :sort-by="[{ key: 'starver', order: 'asc' }]"
                                                     >
+                                                        <template v-slot:item.product="{ item }">
+                                                            {{  item.product ? item.product : 'apStar'}}
+                                                        </template>
+
                                                         <!-- pipe info menu item -->
                                                         <template v-slot:item.pipeinfo="{ item }">
-                                                            <v-btn color="success" density="compact" rounded="0" variant="tonal">Show</v-btn>
+                                                            <pipeline-info-modal
+                                                                :sdssid="sdss_id"
+                                                                :rows="apogeeAllRows"
+                                                                :summary-row="item"
+                                                                :source="{ pipeline: 'apogee' }"
+                                                            ></pipeline-info-modal>
                                                         </template>
+
                                                         <template #item.stem="{ item }">
                                                         <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank">
                                                             {{ item.stem }}
                                                         </a>
-                                                        <span v-else>No product available</span>
+                                                        <span v-else>No file available</span>
                                                         </template>
                                                     </v-data-table-virtual>
                                                     </v-expansion-panel-text>
@@ -134,15 +149,24 @@
                                                         density="compact"
                                                         :sort-by="[{ key: 'mjd', order: 'asc' }]"
                                                     >
+                                                        <template v-slot:item.product="{ item }">
+                                                            {{  item.product ? item.product : 'apVisit'}}
+                                                        </template>
+
                                                         <!-- pipe info menu item -->
                                                         <template v-slot:item.pipeinfo="{ item }">
-                                                            <v-btn color="success" density="compact" rounded="0" variant="tonal">Show</v-btn>
+                                                            <pipeline-info-modal
+                                                                :sdssid="sdss_id"
+                                                                :rows="apogeeAllRows"
+                                                                :summary-row="item"
+                                                                :source="{ pipeline: 'apogee' }"
+                                                            ></pipeline-info-modal>
                                                         </template>
                                                         <template #item.stem="{ item }">
                                                         <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank">
                                                             {{ item.stem }}
                                                         </a>
-                                                        <span v-else>No product available</span>
+                                                        <span v-else>No file available</span>
                                                         </template>
                                                     </v-data-table-virtual>
                                                     </v-expansion-panel-text>
@@ -161,7 +185,7 @@
                                                     <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank">
                                                         {{ item.stem }}
                                                     </a>
-                                                    <span v-else>No product available</span>
+                                                    <span v-else>No file available</span>
                                                 </template>
                                             </v-data-table-virtual>
                                         </v-expansion-panel-text>
@@ -246,6 +270,7 @@ import DataDownload from '@/components/DataDownload.vue'
 import useStoredTheme from '@/composables/useTheme'
 import ParentCatalog from '@/components/ParentCatalog.vue'
 import AstraPipeline from '@/components/AstraPipeline.vue'
+import PipelineInfoModal from '@/components/PipelineInfoModal.vue'
 
 import axiosInstance from '@/axios'
 
@@ -336,7 +361,7 @@ const apogeeStars = computed(() => {
   const stars = pipelines.value?.apogee?.stars ?? []
   return stars.map((row: any) => ({
     ...row,
-    product: row.product || 'apStar',
+    _rowtype: 'star',
   }))
 })
 
@@ -344,9 +369,11 @@ const apogeeVisits = computed(() => {
   const visits = pipelines.value?.apogee?.visits ?? []
   return visits.map((row: any) => ({
     ...row,
-    product: row.product || 'apVisit',
+    _rowtype: 'visit',
   }))
 })
+
+const apogeeAllRows = computed(() => [...apogeeStars.value, ...apogeeVisits.value])
 
 let headmeta = [
     {key: 'display_name', title: 'Display Name'},
