@@ -58,7 +58,7 @@
                                     <!-- astra source info -->
                                     <v-expansion-panel title="Astra Source Info">
                                         <v-expansion-panel-text>
-                                            <v-data-table-virtual :items="convert_object(pipelines.astra)" density="compact"></v-data-table-virtual>
+                                            <v-data-table-virtual :items="convert_object(pipelines.astra.source)" density="compact"></v-data-table-virtual>
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
 
@@ -78,24 +78,119 @@
                                     <!-- boss drp info -->
                                     <v-expansion-panel title="Boss DRP Pipeline Info">
                                         <v-expansion-panel-text>
-                                            <v-data-table-virtual :items="convert_to_table(pipelines.boss, 'boss_drp')" density="compact">
-                                                <template v-slot:item.display_name="{ item }">
-                                                    <p v-tippy="item.description">{{ item.display_name }}</p>
+                                            <v-data-table-virtual :items="pipelines.boss" :headers="bosshead" density="compact">
+                                                <!-- pipe info menu item -->
+                                                <template v-slot:item.pipeinfo="{ item }">
+                                                    <pipeline-info-modal
+                                                        :sdssid="sdss_id"
+                                                        :rows="pipelines.boss || []"
+                                                        :summary-row="item"
+                                                        :source="{ pipeline: 'boss' }"
+                                                    ></pipeline-info-modal>
+                                                </template>
+                                                <template v-slot:item.specprimary="{ item }">
+                                                    <v-icon v-if="item.specprimary">mdi-check</v-icon>
+                                                </template>
+                                                <template v-slot:item.stem="{ item }">
+                                                    <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank" rel="noopener noreferrer">{{ item.stem }}</a>
+                                                    <span v-else>No file available</span>
                                                 </template>
                                             </v-data-table-virtual>
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
+
                                     <!-- apogee drp info -->
                                     <v-expansion-panel title="Apogee DRP Pipeline Info">
                                         <v-expansion-panel-text>
-                                            <v-data-table-virtual :items="convert_object(pipelines.apogee)" density="compact"></v-data-table-virtual>
+                                                <v-expansion-panels variant="accordion" multiple v-model="apopanels">
+                                                <v-expansion-panel title="Stars">
+                                                    <v-expansion-panel-text>
+                                                    <v-data-table-virtual
+                                                        :items="apogeeStars"
+                                                        :headers="apogeeStarsHead"
+                                                        item-value="pk"
+                                                        density="compact"
+                                                        :sort-by="[{ key: 'starver', order: 'asc' }]"
+                                                    >
+                                                        <template v-slot:item.product="{ item }">
+                                                            {{  item.product ? item.product : 'apStar'}}
+                                                        </template>
+
+                                                        <!-- pipe info menu item -->
+                                                        <template v-slot:item.pipeinfo="{ item }">
+                                                            <pipeline-info-modal
+                                                                :sdssid="sdss_id"
+                                                                :rows="apogeeAllRows"
+                                                                :summary-row="item"
+                                                                :source="{ pipeline: 'apogee' }"
+                                                            ></pipeline-info-modal>
+                                                        </template>
+
+                                                        <template #item.stem="{ item }">
+                                                        <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank">
+                                                            {{ item.stem }}
+                                                        </a>
+                                                        <span v-else>No file available</span>
+                                                        </template>
+                                                    </v-data-table-virtual>
+                                                    </v-expansion-panel-text>
+                                                </v-expansion-panel>
+
+                                                <v-expansion-panel title="Visits">
+                                                    <v-expansion-panel-text>
+                                                    <v-data-table-virtual
+                                                        :items="apogeeVisits"
+                                                        :headers="apogeeVisitsHead"
+                                                        item-value="pk"
+                                                        density="compact"
+                                                        :sort-by="[{ key: 'mjd', order: 'asc' }]"
+                                                    >
+                                                        <template v-slot:item.product="{ item }">
+                                                            {{  item.product ? item.product : 'apVisit'}}
+                                                        </template>
+
+                                                        <!-- pipe info menu item -->
+                                                        <template v-slot:item.pipeinfo="{ item }">
+                                                            <pipeline-info-modal
+                                                                :sdssid="sdss_id"
+                                                                :rows="apogeeAllRows"
+                                                                :summary-row="item"
+                                                                :source="{ pipeline: 'apogee' }"
+                                                            ></pipeline-info-modal>
+                                                        </template>
+                                                        <template #item.stem="{ item }">
+                                                        <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank" rel="noopener noreferrer" >
+                                                            {{ item.stem }}
+                                                        </a>
+                                                        <span v-else>No file available</span>
+                                                        </template>
+                                                    </v-data-table-virtual>
+                                                    </v-expansion-panel-text>
+                                                </v-expansion-panel>
+                                                </v-expansion-panels>
+
+
+                                        </v-expansion-panel-text>
+                                    </v-expansion-panel>
+
+                                   <!-- astra products info -->
+                                    <v-expansion-panel title="Astra Products">
+                                        <v-expansion-panel-text>
+                                            <v-data-table-virtual :headers="astraHead" :items="pipelines.astra.products" density="compact">
+                                                <template #item.stem="{ item }">
+                                                    <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank" rel="noopener noreferrer" >
+                                                        {{ item.stem }}
+                                                    </a>
+                                                    <span v-else>No file available</span>
+                                                </template>
+                                            </v-data-table-virtual>
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
 
                                    <!-- astra pipelines info -->
                                     <v-expansion-panel v-if="pipelines.astra_pipelines" title="Astra Pipelines">
                                         <v-expansion-panel-text>
-                                            <span><p>The available pipelines for this target. For detailed info, see the <a :href="astraPipelinesUrl" target="_blank">Pipelines in Astra</a> documentation.</p></span>
+                                            <span><p>The available pipelines for this target. For detailed info, see the <a :href="astraPipelinesUrl" target="_blank" rel="noopener noreferrer">Pipelines in Astra</a> documentation.</p></span>
                                             <astra-pipeline :sdssid="sdss_id" :pipelines="pipelines.astra_pipelines"></astra-pipeline>
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
@@ -131,11 +226,11 @@
                             <v-data-table :items="legacydata" :headers="headlegacy" density="compact">
                                 <!-- add checkmark for in_boss boolean -->
                                 <template v-slot:item.sas_url="{ item }">
-                                    <a :href="item.sas_url" target="_blank">link</a>
+                                    <a :href="item.sas_url" target="_blank" rel="noopener noreferrer" >link</a>
                                 </template>
                                 <!-- add checkmark for in_boss boolean -->
                                 <template v-slot:item.cas_url="{ item }">
-                                    <a :href="item.cas_url" target="_blank">link</a>
+                                    <a :href="item.cas_url" target="_blank" rel="noopener noreferrer" >link</a>
                                 </template>
                             </v-data-table>
                         </v-window-item>
@@ -171,6 +266,7 @@ import DataDownload from '@/components/DataDownload.vue'
 import useStoredTheme from '@/composables/useTheme'
 import ParentCatalog from '@/components/ParentCatalog.vue'
 import AstraPipeline from '@/components/AstraPipeline.vue'
+import PipelineInfoModal from '@/components/PipelineInfoModal.vue'
 
 import axiosInstance from '@/axios'
 
@@ -196,6 +292,7 @@ let legacydata = ref([])
 let cartSort = [{ key: 'run_on', order: 'desc' }]
 let metapanels = ref([0])
 let pipepanels = ref(null)
+let apopanels = ref([0])
 let files = ref([])
 let has_files = ref(false)
 
@@ -225,6 +322,54 @@ let headcart = [
     {key: 'category', title: 'Category'},
     {key: 'run_on', title: 'Date Run On'},
 ]
+
+let bosshead = [
+    {key: 'product', title: 'Product'},
+    {key: 'mjd', title: 'MJD'},
+    {key: 'coadd', title: 'Coadd'},
+    {key: 'specprimary', title: 'Specprimary'},
+    {key: 'stem', title: 'File'},
+    {key: 'pipeinfo', title: 'Parameters'},
+]
+
+const apogeeStarsHead = [
+  { key: 'product', title: 'Product' },
+  { key: 'starver', title: 'StarVer' },
+  { key: 'nvisits', title: 'NVisits' },
+  { key: 'stem', title: 'File' },
+  {key: 'pipeinfo', title: 'Parameters'},
+]
+
+const apogeeVisitsHead = [
+  { key: 'product', title: 'Product' },
+  { key: 'mjd', title: 'MJD' },
+  { key: 'field', title: 'Field' },
+  { key: 'stem', title: 'File' },
+  {key: 'pipeinfo', title: 'Parameters'},
+]
+
+const astraHead = [
+  { key: 'product', title: 'Product' },
+  { key: 'stem', title: 'File' },
+]
+
+const apogeeStars = computed(() => {
+  const stars = pipelines.value?.apogee?.stars ?? []
+  return stars.map((row: any) => ({
+    ...row,
+    _rowtype: 'star',
+  }))
+})
+
+const apogeeVisits = computed(() => {
+  const visits = pipelines.value?.apogee?.visits ?? []
+  return visits.map((row: any) => ({
+    ...row,
+    _rowtype: 'visit',
+  }))
+})
+
+const apogeeAllRows = computed(() => [...apogeeStars.value, ...apogeeVisits.value])
 
 let headmeta = [
     {key: 'display_name', title: 'Display Name'},
