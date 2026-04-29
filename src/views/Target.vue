@@ -333,7 +333,7 @@ let bosshead = [
     {key: 'coadd', title: 'Coadd'},
     {key: 'specprimary', title: 'Specprimary'},
     {key: 'stem', title: 'File'},
-    {key: 'pipeinfo', title: 'Pipeline Parameters'},
+    {key: 'pipeinfo', title: 'Parameters'},
 ]
 
 const apogeeStarsHead = [
@@ -341,7 +341,7 @@ const apogeeStarsHead = [
   { key: 'starver', title: 'StarVer' },
   { key: 'nvisits', title: 'NVisits' },
   { key: 'stem', title: 'File' },
-  {key: 'pipeinfo', title: 'Pipeline Parameters'},
+  {key: 'pipeinfo', title: 'Parameters'},
 ]
 
 const apogeeVisitsHead = [
@@ -349,7 +349,7 @@ const apogeeVisitsHead = [
   { key: 'mjd', title: 'MJD' },
   { key: 'field', title: 'Field' },
   { key: 'stem', title: 'File' },
-{key: 'pipeinfo', title: 'Pipeline Parameters'},
+{key: 'pipeinfo', title: 'Parameters'},
 ]
 
 const astraHead = [
