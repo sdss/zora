@@ -76,7 +76,7 @@
                                 <v-expansion-panels v-else v-model="pipepanels">
 
                                     <!-- boss drp info -->
-                                    <v-expansion-panel title="Boss DRP Pipeline Info">
+                                    <v-expansion-panel title="Boss DRP Info">
                                         <v-expansion-panel-text>
                                             <v-data-table-virtual :items="pipelines.boss" :headers="bosshead" density="compact">
                                                 <!-- pipe info menu item -->
@@ -100,9 +100,10 @@
                                     </v-expansion-panel>
 
                                     <!-- apogee drp info -->
-                                    <v-expansion-panel title="Apogee DRP Pipeline Info">
+                                    <v-expansion-panel v-if="valid_apogee" title="Apogee DRP Info">
                                         <v-expansion-panel-text>
                                                 <v-expansion-panels variant="accordion" multiple v-model="apopanels">
+                                                <!-- stars -->
                                                 <v-expansion-panel title="Stars">
                                                     <v-expansion-panel-text>
                                                     <v-data-table-virtual
@@ -136,6 +137,7 @@
                                                     </v-expansion-panel-text>
                                                 </v-expansion-panel>
 
+                                                <!-- visits -->
                                                 <v-expansion-panel title="Visits">
                                                     <v-expansion-panel-text>
                                                     <v-data-table-virtual
@@ -173,27 +175,42 @@
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
 
-                                   <!-- astra products info -->
-                                    <v-expansion-panel title="Astra Products">
+                                    <!-- apogee DR20 warning beware -->
+                                    <v-expansion-panel v-else disabled title="Apogee DRP Info"></v-expansion-panel>
+                                    <div v-if="show_dr19_apogee_notice" class="px-4 py-2 text-warning">
+                                        Apogee data available in
+                                        <router-link :to="dr19TargetLink" target="_blank">DR19</router-link>
+                                    </div>
+
+                                    <!-- astra DAP info -->
+                                    <v-expansion-panel title="Astra DAP Info">
                                         <v-expansion-panel-text>
-                                            <v-data-table-virtual :headers="astraHead" :items="pipelines.astra.products" density="compact">
-                                                <template #item.stem="{ item }">
-                                                    <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank" rel="noopener noreferrer" >
-                                                        {{ item.stem }}
-                                                    </a>
-                                                    <span v-else>No file available</span>
-                                                </template>
-                                            </v-data-table-virtual>
+                                                <v-expansion-panels variant="accordion" multiple v-model="astrapanels">
+                                                    <!-- astra products info -->
+                                                    <v-expansion-panel title="Products">
+                                                        <v-expansion-panel-text>
+                                                            <v-data-table-virtual :headers="astraHead" :items="pipelines.astra.products" density="compact">
+                                                                <template #item.stem="{ item }">
+                                                                    <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank" rel="noopener noreferrer" >
+                                                                        {{ item.stem }}
+                                                                    </a>
+                                                                    <span v-else>No file available</span>
+                                                                </template>
+                                                            </v-data-table-virtual>
+                                                        </v-expansion-panel-text>
+                                                    </v-expansion-panel>
+
+                                                    <!-- astra pipelines info -->
+                                                    <v-expansion-panel v-if="pipelines.astra_pipelines" title="Pipeline Parameters">
+                                                        <v-expansion-panel-text>
+                                                            <span><p>The available pipelines for this target. For detailed info, see the <a :href="astraPipelinesUrl" target="_blank" rel="noopener noreferrer">Pipelines in Astra</a> documentation.</p></span>
+                                                            <astra-pipeline :sdssid="sdss_id" :pipelines="pipelines.astra_pipelines"></astra-pipeline>
+                                                        </v-expansion-panel-text>
+                                                    </v-expansion-panel>
+                                                </v-expansion-panels>
                                         </v-expansion-panel-text>
                                     </v-expansion-panel>
 
-                                   <!-- astra pipelines info -->
-                                    <v-expansion-panel v-if="pipelines.astra_pipelines" title="Astra Pipelines">
-                                        <v-expansion-panel-text>
-                                            <span><p>The available pipelines for this target. For detailed info, see the <a :href="astraPipelinesUrl" target="_blank" rel="noopener noreferrer">Pipelines in Astra</a> documentation.</p></span>
-                                            <astra-pipeline :sdssid="sdss_id" :pipelines="pipelines.astra_pipelines"></astra-pipeline>
-                                        </v-expansion-panel-text>
-                                    </v-expansion-panel>
                                 </v-expansion-panels>
                             </v-card>
 
@@ -257,7 +274,7 @@
 
 import { useAppStore } from '@/store/app'
 import { useRoute, useRouter } from 'vue-router'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 import Solara from '@/components/Solara.vue'
 import AladinLite from '@/components/AladinLite.vue'
@@ -293,6 +310,7 @@ let cartSort = [{ key: 'run_on', order: 'desc' }]
 let metapanels = ref([0])
 let pipepanels = ref(null)
 let apopanels = ref([0])
+let astrapanels = ref([0])
 let files = ref([])
 let has_files = ref(false)
 
@@ -371,6 +389,26 @@ const apogeeVisits = computed(() => {
 
 const apogeeAllRows = computed(() => [...apogeeStars.value, ...apogeeVisits.value])
 
+const show_dr19_apogee_notice = computed(() => {
+    return store.release === 'DR20' && Boolean(pipelines.value?.astra?.source?.sdss5_dr19_apogee_flag)
+})
+
+const valid_apogee = computed(() => {
+    // APOGEE DRP is not valid in DR20; show fallback panel instead.
+    return store.release !== 'DR20'
+})
+
+const dr19TargetLink = computed(() => {
+    // create the DR19 specific target link
+    const targetId = Array.isArray(sdss_id) ? sdss_id[0] : sdss_id
+
+    return {
+        name: 'target',
+        params: { sdss_id: targetId },
+        query: { release: 'DR19' }
+    }
+})
+
 let headmeta = [
     {key: 'display_name', title: 'Display Name'},
     {key: 'column_name', title: 'Column Name'},
@@ -392,7 +430,8 @@ let headlegacy = [
 async function get_target_info() {
     console.time('Info Time');
 
-    //let rel = "IPL3"
+    loading.value = true
+    iserror.value = false
 
     // set up API call endpoints
     let endpoints = [
@@ -502,11 +541,35 @@ function isHighlighted(item) {
     return catids.includes(item.catalogid.toString()) // === 4295574590
 }
 
+function checkRelease() {
+    // set a new release from query parameters before API calls, then remove it
+    const release = route.query.release
+
+    if (!!release && store.all_releases.includes(release.toUpperCase())) {
+        store.update_release(release.toUpperCase())
+    }
+
+    if (Object.prototype.hasOwnProperty.call(route.query, 'release')) {
+        const query = { ...route.query }
+        delete query.release
+        router.replace({ query })
+    }
+}
+
+// reload the target_info when the release dropdown changes
+watch(() => store.release, (newRelease, oldRelease) => {
+    if (!missingId && newRelease && newRelease !== oldRelease) {
+        get_target_info()
+    }
+})
 
 
 onMounted(() => {
     // get database info
     store.get_db_info()
+
+    // check for a release from a query parameter
+    checkRelease()
 
     // get the available target info
     get_target_info()
