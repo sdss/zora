@@ -13,7 +13,7 @@
           :rules="checkFile"
           hide-details
           clearable
-          dense
+          density="compact"
           prepend-icon=""
           prepend-inner-icon="mdi-upload"
           @change="handleChange"
@@ -67,7 +67,7 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="dialog = false">Close</v-btn>
+          <v-btn color="primary" variant="text" @click="dialog = false">Close</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

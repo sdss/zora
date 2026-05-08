@@ -1,5 +1,5 @@
 <template>
-    <v-menu offset-y location="bottom" :close-on-content-click="false" v-model="menu">
+    <v-menu location="bottom" :close-on-content-click="false" v-model="menu">
         <!-- login button -->
         <template v-slot:activator="{ props }">
           <v-btn v-if="!store.logged_in" v-bind="props" v-tippy="'Log in User'" id="login">

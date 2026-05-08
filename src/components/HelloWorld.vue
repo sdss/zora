@@ -31,8 +31,8 @@
               Input the SDSS ID of your target to go directly there
               <v-text-field class="pt-2"
                 label="Enter SDSS ID"
-                outlined
-                dense
+                variant="outlined"
+                density="compact"
                 clearable
                 v-model="targetId"
                 placeholder="54459273"
