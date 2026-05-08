@@ -102,6 +102,21 @@ npm run format
 
 See [Vite Configuration Reference](https://vitejs.dev/config/).
 
+
+## Updating
+
+### Updating General Dependencies
+
+Run `npm update -S [package_name]` to bump the package to the latest `wanted` version, according to its semantic ver.  This will update both the `package.json` and the lock file.
+
+To see all outdated packages, run `npm outdated`.
+
+### Updating Zora Release
+
+Bump the version in `package.json` then run `npm update` to update the lock file.
+Optionally tag and push a new release with `git tag [version]` and `git push origin [version]`.
+
+
 ## Awesome Links
 
 - [Awesome Vue](https://github.com/vuejs/awesome-vue)
