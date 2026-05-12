@@ -102,7 +102,6 @@ async function navigateToRandomSkyTarget(): Promise<void> {
     const cacheKey = getCacheKey(store.release, 'random_onsky')
     const cached = getCachedRows(cacheKey)
     if (cached) {
-      console.log('Using cached random sky targets')
       rows.value = cached
       store.set_result_data(rows.value)
       await router.push({ name: 'explore' })
@@ -118,7 +117,6 @@ async function navigateToRandomSkyTarget(): Promise<void> {
       sdss_id_list: sdssIds,
       release: store.release
     }
-    console.log('Using new random sky targets')
 
     const response = await axiosInstance.post('/query/sdssid', payload, { headers })
     const data = ('data' in response.data ? response.data.data : response.data) as any[]
