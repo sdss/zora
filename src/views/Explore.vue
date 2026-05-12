@@ -478,17 +478,6 @@ async function check_targets() {
     await nextTick()
     gotoTab(tabs.value[tab.value - 1])
     store.aladin.setFoV(0.1)
-    // const activeTab = tabs.value[tab.value - 1]
-    // const firstEntry = activeTab?.items?.[0]
-
-    // if (firstEntry) {
-    //     childRefs.value[activeTab.value]?.updateSelection([firstEntry])
-    //     store.aladin.gotoRaDec(firstEntry.ra_sdss_id, firstEntry.dec_sdss_id)
-    //     store.aladin.setFoV(0.1)
-    // } else if (activeTab) {
-    //     gotoTab(activeTab)
-    //     store.aladin.setFoV(0.1)
-    // }
 
     // reset the search results
     store.result_targs = []
