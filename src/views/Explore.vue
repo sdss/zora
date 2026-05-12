@@ -382,7 +382,14 @@ function setShape(source) {
 function addCatalog(data: Array<object>, aladin: any, name: string, size: number = 18) {
     // add a new aladin catalog of sources
 
-    var cat = A.catalog({name: name, sourceSize: size, onClick: 'showPopup', shape: setShape});
+    var cat = A.catalog({
+        name: name,
+        sourceSize: size,
+        onClick: 'showPopup',
+        shape: setShape,
+        selectionColor: '#00ff00',
+        selectionLineWidth: 2,
+    });
     aladin.addCatalog(cat);
 
     // test marker with popup
@@ -467,13 +474,24 @@ async function check_targets() {
     // add the search results to a new tab
     await add_tab(store.result_targs, 'Search Results')
 
-    // go to the tab
+    // focus the first result to keep table and sky selection in sync.
     await nextTick()
-    gotoTab(tabs.value[tab.value-1])
+    gotoTab(tabs.value[tab.value - 1])
     store.aladin.setFoV(0.1)
+    // const activeTab = tabs.value[tab.value - 1]
+    // const firstEntry = activeTab?.items?.[0]
+
+    // if (firstEntry) {
+    //     childRefs.value[activeTab.value]?.updateSelection([firstEntry])
+    //     store.aladin.gotoRaDec(firstEntry.ra_sdss_id, firstEntry.dec_sdss_id)
+    //     store.aladin.setFoV(0.1)
+    // } else if (activeTab) {
+    //     gotoTab(activeTab)
+    //     store.aladin.setFoV(0.1)
+    // }
 
     // reset the search results
-    store.result_targs.value = []
+    store.result_targs = []
 
 }
 
