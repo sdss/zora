@@ -344,6 +344,7 @@ let headcart = [
 let bosshead = [
     {key: 'product', title: 'Product'},
     {key: 'mjd', title: 'MJD'},
+    {key: 'field', title: 'Field'},
     {key: 'coadd', title: 'Coadd'},
     {key: 'specprimary', title: 'Specprimary'},
     {key: 'stem', title: 'File'},
