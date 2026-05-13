@@ -6,9 +6,11 @@
       <div class="text-body-2 font-weight-light mb-n1">Welcome to</div>
       <h1 class="text-h2 font-weight-bold">SDSS</h1>
 
-      <div class="py-14" />
+      <div class="randomizer-section">
+        <Randomizer />
+      </div>
 
-      <v-row justify="center" class="d-flex align-stretch">
+      <v-row justify="center" class="d-flex align-stretch card-row">
         <!-- Search Page Card -->
         <v-col cols="12" sm="6" md="4">
           <v-card class="pa-5 d-flex flex-column" hover>
@@ -65,6 +67,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ConeSearch from '@/components/ConeSearch.vue'
+import Randomizer from '@/components/Randomizer.vue'
 import useStoredTheme from '@/composables/useTheme'
 
 // mount the stored theme
@@ -78,3 +81,15 @@ const navigateToTarget = () => {
 };
 
 </script>
+
+<style scoped>
+.randomizer-section {
+  width: min(100%, 56rem);
+  margin: 1.5rem auto 2.5rem;
+}
+
+.card-row {
+  width: 100%;
+  margin-top: 0;
+}
+</style>

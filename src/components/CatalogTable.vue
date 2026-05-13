@@ -61,6 +61,17 @@
         <router-link :to="{ name: 'target', params: { sdss_id: item.sdss_id } }" target="_blank">{{ item.sdss_id }}</router-link>
     </template>
 
+    <template v-slot:item.focus_target="{ item }">
+        <v-btn
+            icon="mdi-target"
+            variant="text"
+            density="compact"
+            rounded="0"
+            v-tippy="{content: 'Go to target', placement: 'right'}"
+            @click.stop="focusTarget(item)">
+        </v-btn>
+    </template>
+
     </v-data-table>
 </template>
 
@@ -72,18 +83,21 @@ import ExportTable from '@/components/ExportTable.vue'
 // define which properties are passed in from the parent, i.e. ":xxx"
 const props = defineProps<{
     id: number,
-    items: Array<Object>,
+    items: Array<any>,
     catalog: any
 }>()
 
-const store = useAppStore()
+const store = useAppStore() as any
 
-let selected = ref([])
+let selected = ref<any[]>([])
 let page = ref(1)
 let itemsPerPage = ref(10)
 let sortBy = ref([])
 let temph = Object.entries(props.items[0]).map((item)=> ({title: item[0], key: item[0], type: typeof item[1], description: store.get_field_from_db(item[0], 'description')}))
-let headers = reorderArrayObjects(temph, ['sdss_id', 'ra_sdss_id', 'dec_sdss_id', 'has_been_observed', 'in_boss', 'in_apogee', 'in_astra']);
+let headers = [
+  { title: '', key: 'focus_target', sortable: false, width: 20 },
+  ...reorderArrayObjects(temph, ['sdss_id', 'ra_sdss_id', 'dec_sdss_id', 'has_been_observed', 'in_boss', 'in_apogee', 'in_astra'])
+]
 
 const targsymbols = [
     { text: 'MWM-only', icon: 'mdi-square-outline' },
@@ -131,8 +145,22 @@ watch(selected, (newVal) => {
 })
 
 // Function to update selection from parent
-const updateSelection = (newSelection) => {
+const updateSelection = (newSelection: any[]) => {
   selected.value = newSelection
+}
+
+function focusTarget(item: any) {
+    // go to the target on reticle click
+    if (!store.aladin || item.ra_sdss_id == null || item.dec_sdss_id == null) {
+        return
+    }
+    //selected.value = [item]
+    store.aladin.gotoRaDec(item.ra_sdss_id, item.dec_sdss_id)
+}
+
+function hideAladinPopup() {
+    // hide the popup in the view when selecting in table
+    store.aladin?.popup?.hide?.()
 }
 
 // Expose the updateSelection function to the parent
@@ -142,8 +170,8 @@ defineExpose({ updateSelection })
 watch(selected, (newVal) => {
         // watch the selected table row and select the corresponding object in the Aladin view
 
-        // First, checking whether dither is selected, since changing of LVMStore.selectedDithers
-        // can be caused by deselecting the dither
+        // First, checking whether object is selected, since changing of objects
+        // can be caused by deselecting the object
         if (newVal && newVal.length > 0) {
 
             let itemList = props.items
@@ -153,7 +181,7 @@ watch(selected, (newVal) => {
                 itemList = sortItems(itemList, sortBy.value[0])
             }
 
-            // find index in (sorted) list of dithers
+            // find index in (sorted) list of targets
             const itemIdx = itemList.findIndex(item => item.sdss_id === newVal[0].sdss_id)
 
             // find page of selected dither
@@ -161,17 +189,32 @@ watch(selected, (newVal) => {
             page.value = pg
 
             // select the object in the Aladin view
-            let sources = props.catalog.sources
-            let obj = sources.filter(item => (item.data && item.data.sdss_id == newVal[0].sdss_id))
-            if (obj.length > 0) {
-                props.catalog.deselectAll()
-                obj[0].select()
-            }
+            const selectedId = newVal[0].sdss_id
+            // Aladin >=3.8 catalog selection via callback
+            props.catalog.select((source: any) => source?.data?.sdss_id === selectedId)
+
             // animate to the selected object
             //store.aladin.animateToRaDec(newVal[0].ra_sdss_id, newVal[0].dec_sdss_id, 0.4)
         } else {
             props.catalog.deselectAll()
+            hideAladinPopup()
         }
     }, {deep: true})
 
 </script>
+
+<style scoped>
+/* Target header of the focus_target column */
+:deep(.v-data-table__th:nth-child(2)) {
+  width: 10px !important; /* Enforce exact width */
+  min-width: 10px !important;
+    padding: 0 !important;
+}
+
+/* Target data cells of the focus_target column */
+:deep(.v-data-table__td:nth-child(2)) {
+  width: 10px !important;
+  min-width: 10px !important;
+    padding: 0 !important;
+}
+</style>
