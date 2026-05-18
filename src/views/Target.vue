@@ -78,7 +78,7 @@
                                     <!-- boss drp info -->
                                     <v-expansion-panel title="Boss DRP Info">
                                         <v-expansion-panel-text>
-                                            <v-data-table-virtual :items="pipelines.boss" :headers="bosshead" density="compact">
+                                            <v-data-table-virtual class="pipeline-scroll-table" :items="pipelines.boss" :headers="bosshead" density="compact">
                                                 <!-- pipe info menu item -->
                                                 <template v-slot:item.pipeinfo="{ item }">
                                                     <pipeline-info-modal
@@ -141,6 +141,7 @@
                                                 <v-expansion-panel title="Visits">
                                                     <v-expansion-panel-text>
                                                     <v-data-table-virtual
+                                                        class="pipeline-scroll-table"
                                                         :items="apogeeVisits"
                                                         :headers="apogeeVisitsHead"
                                                         item-value="pk"
@@ -585,5 +586,14 @@ onMounted(() => {
 
 .v-theme--dark .highlighted-row {
   background-color: rgba(255, 255, 255, 0.1) !important; /* Lighter shade in dark theme */
+}
+
+.pipeline-scroll-table {
+    max-height: 420px;
+}
+
+.pipeline-scroll-table .v-table__wrapper {
+    max-height: 420px;
+    overflow-y: auto;
 }
 </style>
