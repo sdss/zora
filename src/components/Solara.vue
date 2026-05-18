@@ -33,7 +33,9 @@ let valid = ref(false)
 let errmsg = ref('')
 let theme = useTheme()
 
-let url = ref(import.meta.env.VITE_API_URL + `/solara/embed/?release=${store.release}&sdssid=${props.sdssid}&files=${props.files.join()}&theme=${theme.global.name.value}`)
+// encode the file paths for any + in the filename, e.g. apStar
+const urienc = props.files.map(encodeURIComponent)
+let url = ref(import.meta.env.VITE_API_URL + `/solara/embed/?release=${store.release}&sdssid=${props.sdssid}&files=${urienc.join()}&theme=${theme.global.name.value}`)
 console.log('url', url)
 
 async function check_solara() {
