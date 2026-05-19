@@ -264,7 +264,7 @@
                 <v-skeleton-loader v-if="loading" type="card"></v-skeleton-loader>
                 <v-banner v-else-if="!store.is_allowed()" type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-confused"><v-banner-text>User not allowed to access spectra data.</v-banner-text></v-banner>
                 <v-banner v-else-if="!has_files" type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-cry"><v-banner-text>No spectral data available to load.</v-banner-text></v-banner>
-                <Solara v-else :sdssid="sdss_id" :files="files"></Solara>
+                <Solara v-else :sdssid="sdss_id" :files="files" :first="first"></Solara>
             </v-col>
         </v-row>
 
@@ -313,6 +313,7 @@ let pipepanels = ref(null)
 let apopanels = ref([0])
 let astrapanels = ref([0])
 let files = ref([])
+let first = ref('')
 let has_files = ref(false)
 
 let head = [
@@ -461,7 +462,8 @@ async function get_target_info() {
         .filter(filePath => filePath && filePath.trim() !== '');
       // add files from legacy data
       files.value.push.apply(files.value, legacy.map(x => x.filepath) );
-      console.log('files', files.value, files.value.length)
+      first.value = pipes.files.astra?.[0] ?? pipes.files.boss?.[0] ?? pipes.files.apogee?.[0];
+      console.log('files', files.value, files.value.length, first.value)
       has_files.value = check_files(files.value)
       console.log('has_files', has_files.value)
       console.timeEnd('Info Time')

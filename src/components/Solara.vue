@@ -19,6 +19,7 @@ const store = useAppStore()
 const props = defineProps<{
     sdssid: string,
     files: Array<string>,
+    first: string
 }>()
 
 // set the body attributes for solara popout
@@ -28,19 +29,23 @@ const pathname = (vurl.pathname.endsWith('/')) ? vurl.pathname : vurl.pathname +
 document.body.setAttribute('data-base-url', pathname)
 document.body.setAttribute('data-voila-host', vurl.origin)
 
-let iframe = ref(null)
+let iframe = ref<HTMLIFrameElement | null>(null)
 let valid = ref(false)
 let errmsg = ref('')
 let theme = useTheme()
 
 // encode the file paths for any + in the filename, e.g. apStar
 const urienc = props.files.map(encodeURIComponent)
-let url = ref(import.meta.env.VITE_API_URL + `/solara/embed/?release=${store.release}&sdssid=${props.sdssid}&files=${urienc.join()}&theme=${theme.global.name.value}`)
+const urifirst = encodeURIComponent(props.first)
+let url = ref(import.meta.env.VITE_API_URL + `/solara/embed/?release=${store.release}&sdssid=${props.sdssid}&files=${urifirst}&theme=${theme.global.name.value}`)
 console.log('url', url)
+
+// set target origin for postMessages
+const targetOrigin = new URL(url.value).origin
 
 async function check_solara() {
 
-    await axios.get(import.meta.env.VITE_API_URL + '/solara/embed/', {withCredentials: true})
+    await axios.get(import.meta.env.VITE_API_URL + '/solara/readyz', {withCredentials: true})
         .then((response) => {
             console.log('solara response', response)
             valid.value = true
@@ -61,9 +66,34 @@ watch(() => theme.global.name.value, (newVal) => {
     console.log('theme change', newVal)
     // watch for theme changes and send request
     if (iframe.value && iframe.value.contentWindow) {
-        iframe.value.contentWindow.postMessage({type: 'themeChange', theme: newVal}, '*')
+        iframe.value.contentWindow.postMessage({type: 'themeChange', theme: newVal}, targetOrigin)
+
     }
 })
+
+function postFiles() {
+    // post the files to the solara server
+    if (props.files && iframe.value && iframe.value.contentWindow) {
+        const files = props.files.map((f) => String(f))
+        iframe.value.contentWindow.postMessage({type: 'updateFiles', files: files}, targetOrigin)
+    }
+}
+
+window.addEventListener('message', (event) => {
+    // event listener from the solara backend
+
+    if (event.origin !== targetOrigin) {
+        console.warn('Received message from unknown origin:', event.origin)
+        return
+    }
+    console.log('Received message from Solara iframe:', event.data)
+
+    // backend has initialized enough to message parent; send files now
+    if (event.data === 'ready') {
+        postFiles()
+    }
+})
+
 
 onMounted(() => {
     // check the solara server
