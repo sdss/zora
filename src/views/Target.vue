@@ -78,6 +78,7 @@
                                     <!-- boss drp info -->
                                     <v-expansion-panel title="Boss DRP Info">
                                         <v-expansion-panel-text>
+                                            <span>For information on the pipeline products, see <a :href="bossUrl", target="_blank" rel="noopener noreferrer">BOSS spectra</a></span>
                                             <v-data-table-virtual class="pipeline-scroll-table" :items="pipelines.boss" :headers="bosshead" density="compact">
                                                 <!-- pipe info menu item -->
                                                 <template v-slot:item.pipeinfo="{ item }">
@@ -507,6 +508,12 @@ function gotoExplore() {
     const routeData = router.resolve({ name: 'explore', query: { ra: metadata.value.ra_sdss_id, dec: metadata.value.dec_sdss_id }})
     window.open(routeData.href, '_blank')
 }
+
+const bossUrl = computed(() => {
+    // compute the BOSS spectra URL based on the release
+    const release = store.release.toLowerCase()
+    return `https://www.sdss.org/${release}/bhm/data/spectra/`
+})
 
 // Computed property for Astra pipelines URL that updates with release changes
 const astraPipelinesUrl = computed(() => {
