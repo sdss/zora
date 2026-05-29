@@ -31,7 +31,7 @@
                         <v-tab value="pipes">Pipelines</v-tab>
                         <v-tab value="sources">Sources</v-tab>
                         <v-tab value="cartons">Cartons</v-tab>
-                        <v-tab v-if="metadata.has_legacy_data"value="legacy">Legacy SDSS</v-tab>
+                        <v-tab v-if="has_legacy_data" value="legacy">Legacy SDSS</v-tab>
                     </v-tabs>
 
                     <v-card-text>
@@ -513,6 +513,11 @@ const bossUrl = computed(() => {
     // compute the BOSS spectra URL based on the release
     const release = store.release.toLowerCase()
     return `https://www.sdss.org/${release}/bhm/data/spectra/`
+})
+
+const has_legacy_data = computed(() => {
+    // check if there is legacy data to show the tab
+    return metadata.value.has_legacy_data || legacydata.value.length > 0
 })
 
 // Computed property for Astra pipelines URL that updates with release changes
