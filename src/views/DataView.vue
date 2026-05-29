@@ -3,14 +3,14 @@
     <v-col md="12" class="d-flex flex-column">
       <!-- Banner -->
       <v-banner
-        v-if="!['IPL3', 'DR19'].includes(store.release)"
+        v-if="!['IPL3', 'DR19', 'DR20'].includes(store.release)"
         class="ma-4"
         color="error"
         lines="one"
         icon="mdi-emoticon-sad"
       >
         <v-banner-text>
-          The DataView dashboard is only available for IPL-3.
+          The DataView dashboard is only available for IPL-3, DR19, and DR20.
         </v-banner-text>
       </v-banner>
 
@@ -52,6 +52,13 @@ watch(() => store.theme, (newVal) => {
     // watch for theme changes and send request
     if (iframe.value && iframe.value.contentWindow) {
         iframe.value.contentWindow.postMessage({type: 'themeChange', theme: newVal}, '*')
+    }
+})
+
+// reload the dashboard when the release dropdown changes
+watch(() => store.release, (newRelease, oldRelease) => {
+    if (newRelease && newRelease !== oldRelease) {
+        url.value = import.meta.env.VITE_API_URL + `/solara/dashboard?release=${newRelease}&theme=${store.theme}`
     }
 })
 
