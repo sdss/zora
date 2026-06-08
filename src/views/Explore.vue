@@ -323,7 +323,7 @@ function get_hipscat(item) {
     let [release, survey] = item.split(':')
 
     let url = import.meta.env.VITE_API_URL + `/static/mocs/${release}/${survey}`
-    var hips = A.catalogHiPS(url, {onClick: 'showPopup', name: survey, sourceSize: 10});
+    var hips = A.catalogHiPS(url, {onClick: 'showPopup', name: `${survey}-${release}`, sourceSize: 10});
     aladin.addCatalog(hips);
 }
 
