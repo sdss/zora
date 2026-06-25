@@ -193,7 +193,8 @@
                                                         <v-expansion-panel-text>
                                                             <v-data-table-virtual :headers="astraHead" :items="pipelines.astra.products" density="compact">
                                                                 <template #item.stem="{ item }">
-                                                                    <a v-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank" rel="noopener noreferrer" >
+                                                                    <span v-if="item.has_data === false">Empty file</span>
+                                                                    <a v-else-if="item.stem" :href="'https://data.sdss5.org/sas/' + item.location" target="_blank" rel="noopener noreferrer" >
                                                                         {{ item.stem }}
                                                                     </a>
                                                                     <span v-else>No file available</span>
