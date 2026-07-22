@@ -32,17 +32,17 @@ const routes = [
       {
         path: '/target/:sdss_id?',
         name: 'target',
-        component: () => import(/* webpackChunkName: "results" */ '@/views/Target.vue')
+        component: () => import(/* webpackChunkName: "target" */ '@/views/Target.vue')
       },
       {
         path: '/explore',
         name: 'explore',
-        component: () => import(/* webpackChunkName: "results" */ '@/views/Explore.vue')
+        component: () => import(/* webpackChunkName: "explore" */ '@/views/Explore.vue')
       },
       {
         path: '/dataview',
         name: 'dataview',
-        component: () => import(/* webpackChunkName: "results" */ '@/views/DataView.vue')
+        component: () => import(/* webpackChunkName: "dataview" */ '@/views/DataView.vue')
       }
     ]
   }
