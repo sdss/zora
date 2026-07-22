@@ -88,7 +88,7 @@
 <script lang="ts" setup>
 import A from 'aladin-lite'
 import useStoredTheme from '@/composables/useTheme'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/store/app'
 import { ref, onMounted, nextTick, watch } from 'vue'
 import axiosInstance from '@/axios'
@@ -102,6 +102,7 @@ const store = useAppStore()
 
 // get the initial target from the route
 const route = useRoute()
+const router = useRouter()
 let target = ''
 let fov = null
 if (!route.query.ra || !route.query.dec) {
@@ -135,6 +136,41 @@ function gotoTab(item) {
     const ra = average(item.items.map(ii => ii.ra_sdss_id))
     const dec = average(item.items.map(ii => ii.dec_sdss_id))
     store.aladin.gotoRaDec(ra, dec)
+}
+
+function escapeHtml(value: unknown): string {
+    // escape html for custom table popup display
+    return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;')
+}
+
+function showSourcePopup(source: any): void {
+    // custom popup table for source data, with link to target page for sdss_id
+    const rows = Object.entries(source.data)
+        .map(([key, value]) => {
+            const escapedKey = escapeHtml(key)
+
+            if (key === 'sdss_id' && value != null) {
+                const href = router.resolve({
+                    name: 'target',
+                    params: { sdss_id: String(value) }
+                }).href
+
+                return `<tr><td>${escapedKey}</td><td><a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(value)}</a></td></tr>`
+            }
+
+            return `<tr><td>${escapedKey}</td><td>${escapeHtml(value)}</td></tr>`
+        })
+        .join('')
+
+    aladin.popup.setTitle('<br><br>')
+    aladin.popup.setText(`<div class="aladin-marker-measurement"><table>${rows}</table></div>`)
+    aladin.popup.setSource(source)
+    aladin.popup.show()
 }
 
 async function setupAladin() {
@@ -323,7 +359,12 @@ function get_hipscat(item) {
     let [release, survey] = item.split(':')
 
     let url = import.meta.env.VITE_API_URL + `/static/mocs/${release}/${survey}`
-    var hips = A.catalogHiPS(url, {onClick: 'showPopup', name: `${survey}-${release}`, sourceSize: 10});
+    var hips = A.catalogHiPS(url, {
+        name: `${survey}-${release}`,
+        sourceSize: 10,
+        shape: 'circle',
+        onClick: showSourcePopup,
+    });
     aladin.addCatalog(hips);
 }
 
@@ -385,7 +426,7 @@ function addCatalog(data: Array<object>, aladin: any, name: string, size: number
     var cat = A.catalog({
         name: name,
         sourceSize: size,
-        onClick: 'showPopup',
+        onClick: showSourcePopup,
         shape: setShape,
         selectionColor: '#00ff00',
         selectionLineWidth: 2,
