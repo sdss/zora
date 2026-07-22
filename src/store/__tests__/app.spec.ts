@@ -52,6 +52,39 @@ describe('App Store', () => {
         expect(store.release).toEqual('DR18')
       })
 
+      it('uses the release in the SDSS hostname as the default', () => {
+        vi.stubGlobal('location', new URL('https://dr17.sdss.org'))
+        const store = useAppStore()
+        store.all_releases = ['DR18', 'DR17', 'DR16']
+
+        store.check_release()
+
+        expect(store.release).toEqual('DR17')
+        vi.unstubAllGlobals()
+      })
+
+      it('uses the latest release when the hostname release is unavailable', () => {
+        vi.stubGlobal('location', new URL('https://dr19.sdss.org'))
+        const store = useAppStore()
+        store.all_releases = ['DR18', 'DR17', 'DR16']
+
+        store.check_release()
+
+        expect(store.release).toEqual('DR18')
+        vi.unstubAllGlobals()
+      })
+
+      it('uses the latest release when the domain is different', () => {
+        vi.stubGlobal('location', new URL('https://data.sdss.org'))
+        const store = useAppStore()
+        store.all_releases = ['DR20', 'DR19', 'IPL4']
+
+        store.check_release()
+
+        expect(store.release).toEqual('DR20')
+        vi.unstubAllGlobals()
+      })
+
       it('resets users', () => {
         const store = useAppStore()
         store.user = {username: 'test'}

@@ -35,7 +35,16 @@ export const useAppStore = defineStore('app', {
 
     check_release() {
       // check the selected release when logging out to ensure a public one is selected
-      this.release = (!this.release.startsWith("DR") && !this.logged_in) ? this.get_releases()[0] : this.release
+      if (!this.release.startsWith("DR") && !this.logged_in) {
+        const releases = this.get_releases()
+        const hostname = new URL(window.location.origin).hostname
+        const hostnameRelease = hostname.match(/^dr(\d+)\.sdss\.org$/i)
+        const preferredRelease = hostnameRelease ? `DR${hostnameRelease[1]}` : undefined
+
+        this.release = preferredRelease && releases.includes(preferredRelease)
+          ? preferredRelease
+          : releases[0]
+      }
     },
 
     reset_user() {
