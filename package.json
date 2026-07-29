@@ -1,6 +1,6 @@
 {
   "name": "zora",
-  "version": "0.3.0",
+  "version": "0.3.1dev",
   "private": true,
   "type": "module",
   "scripts": {
