@@ -20,9 +20,11 @@ import { computed } from 'vue'
 import axios from 'axios'
 import { onMounted } from 'vue'
 import { useAppStore } from '@/store/app'
+import { useRoute } from 'vue-router'
 
 // get the application state store
 const store = useAppStore()
+const route = useRoute()
 
 // mount data, "ref" marks the data as reactive
 //const select = ref('select a data release')
@@ -70,6 +72,11 @@ async function get_releases() {
 onMounted(() => {
     // get the available data releases
     get_releases()
+
+    // check if release is specified in the route query and is available in the store
+    if (route.query?.release && store.all_releases.includes(route.query.release.toUpperCase())) {
+      store.update_release(route.query.release.toUpperCase() as string)
+    }
 })
 
 </script>
