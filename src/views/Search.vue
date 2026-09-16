@@ -42,7 +42,7 @@
           </v-col>
         </v-row>
         <v-row>
-            <v-col cols="2" md="2">
+          <v-col cols="2" md="2">
             <!-- search id field -->
             <v-select
               v-model="searchType"
@@ -50,6 +50,12 @@
               v-tippy="{content:'Select the type of identifier to search on', placement: 'left', maxWidth: 200}"
               :items="['sdssid', 'altid']"
             ></v-select>
+              <v-select v-if="searchType == 'altid'"
+                v-model="formData.idtype"
+                label="Altid Type"
+                v-tippy="{content:'For integer alternate ids, the type of integer identifier', placement: 'left', maxWidth: 200}"
+                :items="['catalogid', 'gaiaid']"
+              ></v-select>
             </v-col>
             <v-col cols="3" md="3">
             <text-input
@@ -186,6 +192,7 @@ let initFormData = {
   radius: '0.1',
   id: '',
   altid: '',
+  idtype: 'catalogid',
   units: 'degree',
   release: store.release,
   carton: '',
