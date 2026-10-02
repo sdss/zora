@@ -462,7 +462,7 @@ const apmadgics = [
   { key: 'plate', title: 'Plate' },
   { key: 'fiberid', title: 'Fiber ID' },
   { key: 'field', title: 'Field' },
-  { key: 'cartVisit', title: 'Cart Visit' },
+  { key: 'cartvisit', title: 'Cart Visit' },
   { key: 'apogee_id', title: 'APOGEE ID' },
   { key: 'gaiaedr3_source_id', title: 'GAIA EDR3 Source ID' },
   { key: 'telescope', title: 'Telescope' },
@@ -479,7 +479,9 @@ const apmadgics = [
 
 function load_madgic_spectrum(item, star_prior = 'dd') {
     console.log('load_madgic_spectrum', item, star_prior)
-    solara.value?.loadApMadgics(String(sdss_id), item.map2madgics, item.mjd, item.plate, star_prior)
+    let idx = Math.floor(Math.random() * (100-1)+1)
+    // item.map2madgics
+    solara.value?.loadApMadgics(String(sdss_id), idx, item.mjd, item.plate, star_prior)
 }
 
 async function get_target_info() {
