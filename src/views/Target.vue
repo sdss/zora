@@ -32,6 +32,7 @@
                         <v-tab value="sources">Sources</v-tab>
                         <v-tab value="cartons">Cartons</v-tab>
                         <v-tab v-if="has_legacy_data" value="legacy">Legacy SDSS</v-tab>
+                        <v-tab v-if="has_vac_data" value="vacs">VACs</v-tab>
                     </v-tabs>
 
                     <v-card-text>
@@ -254,6 +255,25 @@
                                 </template>
                             </v-data-table>
                         </v-window-item>
+
+                        <!-- vac tab -->
+                         <v-window-item key="vacs" value="vacs">
+                            <v-expansion-panels v-model="vacpanels">
+                                <v-expansion-panel v-if="vacsdata.apmadgics" title="ApMADJICS Visits">
+                                    <v-expansion-panel-text>
+                                        <span>For information on this VAC, see <a href="https://www.sdss.org/dr20/data_access/value-added-catalogs/?vac_id=10006" target="_blank" rel="noopener noreferrer">ApMADJICS</a></span>
+                                        <v-data-table-virtual :headers="apmadgics" :items="vacsdata.apmadgics" density="compact">
+                                            <template v-slot:item.load="{ item }">
+                                                <div class="d-flex">
+                                                    <v-btn size="x-small" variant="text" v-tippy="'Load the spectrum with the data-driven star prior'" @click="load_madgic_spectrum(item, 'dd')">dd</v-btn>
+                                                    <v-btn size="x-small" variant="text" v-tippy="'Load the spectrum with the theoretical star prior'" @click="load_madgic_spectrum(item, 'th')">th</v-btn>
+                                                </div>
+                                            </template>
+                                        </v-data-table-virtual>
+                                    </v-expansion-panel-text>
+                                </v-expansion-panel>
+                            </v-expansion-panels>
+                         </v-window-item>
                     </v-window>
                     </v-card-text>
                 </v-card>
@@ -266,7 +286,7 @@
                 <v-skeleton-loader v-if="loading" type="card"></v-skeleton-loader>
                 <v-banner v-else-if="!store.is_allowed()" type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-confused"><v-banner-text>User not allowed to access spectra data.</v-banner-text></v-banner>
                 <v-banner v-else-if="!has_files" type="warning" class='ma-4' color="warning" lines="one" icon="mdi-emoticon-cry"><v-banner-text>No spectral data available to load.</v-banner-text></v-banner>
-                <Solara v-else :sdssid="sdss_id" :files="files" :first="first"></Solara>
+                <Solara v-else ref="solara" :sdssid="sdss_id" :files="files" :first="first"></Solara>
             </v-col>
         </v-row>
 
@@ -309,14 +329,18 @@ let sources = ref([])
 let carts = ref([])
 let pipelines = ref({})
 let legacydata = ref([])
+let vacsdata = ref({})
 let cartSort = [{ key: 'run_on', order: 'desc' }]
 let metapanels = ref([0])
 let pipepanels = ref(null)
+let vacpanels = ref([0])
 let apopanels = ref([0])
 let astrapanels = ref([0])
 let files = ref([])
 let first = ref('')
 let has_files = ref(false)
+let has_vac_data = ref(false)
+const solara = ref<InstanceType<typeof Solara> | null>(null)
 
 let head = [
     { title: '', key:'icon', value: 'icon', sortable: false },
@@ -432,6 +456,32 @@ let headlegacy = [
     {key: 'cas_url', title: 'CAS'},
 ]
 
+const apmadgics = [
+  { key: 'load', title: 'Load', sortable: false },
+  { key: 'mjd', title: 'MJD' },
+  { key: 'plate', title: 'Plate' },
+  { key: 'fiberid', title: 'Fiber ID' },
+  { key: 'field', title: 'Field' },
+  { key: 'cartVisit', title: 'Cart Visit' },
+  { key: 'apogee_id', title: 'APOGEE ID' },
+  { key: 'gaiaedr3_source_id', title: 'GAIA EDR3 Source ID' },
+  { key: 'telescope', title: 'Telescope' },
+  { key: 'rv_bary_dd', title: 'RV Bary dd' },
+  { key: 'rv_flag_dd', title: 'RV Flag dd' },
+  { key: 'rv_bary_th', title: 'RV Bary th' },
+  { key: 'rv_flag_th', title: 'RV Flag th' },
+  { key: 'rv_verr_sys_th', title: 'RV Verr Sys th' },
+  { key: 'ra', title: 'RA' },
+  { key: 'dec', title: 'DEC' },
+  { key: 'glon', title: 'GLON' },
+  { key: 'glat', title: 'GLAT' },
+]
+
+function load_madgic_spectrum(item, star_prior = 'dd') {
+    console.log('load_madgic_spectrum', item, star_prior)
+    solara.value?.loadApMadgics(String(sdss_id), item.map2madgics, item.mjd, item.plate, star_prior)
+}
+
 async function get_target_info() {
     console.time('Info Time');
 
@@ -444,13 +494,14 @@ async function get_target_info() {
         `/target/cartons/${sdss_id}?release=${store.release}`,
         `/target/catalogs/${sdss_id}?release=${store.release}`,
         `/target/pipelines/${sdss_id}?release=${store.release}`,
-        `/target/legacy/${sdss_id}`
+        `/target/legacy/${sdss_id}`,
+        `/target/vacs/${sdss_id}?release=${store.release}`
     ]
 
     // await the promises
     await Promise.all(endpoints.map((endpoint) => axiosInstance.get(endpoint, {headers: store.get_auth_hdr()})))
-    .then(([{data: target}, {data: cartons}, {data: catalogs}, {data: pipes}, {data: legacy}] )=> {
-      console.log({ target, cartons, catalogs, pipes, legacy })
+    .then(([{data: target}, {data: cartons}, {data: catalogs}, {data: pipes}, {data: legacy}, {data: vacs}] )=> {
+      console.log({ target, cartons, catalogs, pipes, legacy, vacs })
       loading.value = false
       nodata.value = Object.keys(target).length === 0
       metadata.value = target
@@ -458,6 +509,8 @@ async function get_target_info() {
       sources.value = catalogs
       pipelines.value = pipes
       legacydata.value = legacy
+      vacsdata.value = vacs
+      has_vac_data.value = !!vacs ? true : false
       // add files from pipelines
       files.value = Object.values(pipes.files)
         .flatMap(value => Array.isArray(value) ? value : [value])
