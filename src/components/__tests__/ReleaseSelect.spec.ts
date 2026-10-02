@@ -18,6 +18,10 @@ function get_releases() {
 
 vi.mock('axios')
 
+vi.mock('vue-router', () => ({
+  useRoute: () => ({ query: {} }),
+}))
+
 // use describe to organize tests around each component, better for reports
 describe('ReleaseSelect', () => {
     const vuetify = createVuetify({ components, directives })
