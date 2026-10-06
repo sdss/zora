@@ -79,6 +79,15 @@ function postFiles() {
     }
 }
 
+function loadApMadgics(sdssid: string | number, idx: number, mjd: number, plate: number, star_prior: string = 'dd') {
+    // post the apMADGICS visit lookup index to the solara server
+    if (iframe.value && iframe.value.contentWindow) {
+        iframe.value.contentWindow.postMessage({type: 'loadApMadgics', sdssid: String(sdssid), idx: idx, mjd: mjd, plate: plate, star_prior: star_prior}, targetOrigin)
+    }
+}
+
+defineExpose({ loadApMadgics })
+
 window.addEventListener('message', (event) => {
     // event listener from the solara backend
 
