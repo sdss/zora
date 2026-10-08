@@ -259,9 +259,9 @@
                         <!-- vac tab -->
                          <v-window-item key="vacs" value="vacs">
                             <v-expansion-panels v-model="vacpanels">
-                                <v-expansion-panel v-if="vacsdata.apmadgics" title="ApMADJICS Visits">
+                                <v-expansion-panel v-if="vacsdata.apmadgics" title="ApMADGICS Visits">
                                     <v-expansion-panel-text>
-                                        <span>For information on this VAC, see <a href="https://www.sdss.org/dr20/data_access/value-added-catalogs/?vac_id=10006" target="_blank" rel="noopener noreferrer">ApMADJICS</a></span>
+                                        <span>For information on this VAC, see <a href="https://www.sdss.org/dr20/data_access/value-added-catalogs/?vac_id=10006" target="_blank" rel="noopener noreferrer">ApMADGICS</a></span>
                                         <v-data-table-virtual :headers="apmadgics" :items="vacsdata.apmadgics" density="compact">
                                             <template v-slot:item.load="{ item }">
                                                 <div class="d-flex">
